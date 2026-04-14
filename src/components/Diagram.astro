@@ -1,0 +1,83 @@
+---
+interface Props {
+  caption?: string;
+}
+
+const { caption } = Astro.props;
+const id = `mermaid-${Math.random().toString(36).slice(2, 8)}`;
+---
+
+<figure class="diagram">
+  <div class="diagram-container" id={id}>
+    <pre class="mermaid-src"><slot /></pre>
+  </div>
+  {caption && <figcaption>{caption}</figcaption>}
+</figure>
+
+<script>
+  async function initDiagrams() {
+    const mermaid = (await import('mermaid')).default;
+    mermaid.initialize({
+      startOnLoad: false,
+      theme: 'dark',
+      themeVariables: {
+        primaryColor: '#242424',
+        primaryTextColor: '#ede9e3',
+        primaryBorderColor: '#fa520f',
+        lineColor: '#ffa110',
+        secondaryColor: '#1a1a1a',
+        tertiaryColor: '#0f0f0f',
+        noteTextColor: '#ede9e3',
+        noteBkgColor: '#1a1a1a',
+        noteBorderColor: '#2e2e2e',
+        edgeLabelBackground: '#0f0f0f',
+        clusterBkg: '#1a1a1a',
+        clusterBorder: '#2e2e2e',
+        fontFamily: 'Inter, sans-serif',
+      },
+    });
+
+    document.querySelectorAll('.mermaid-src').forEach(async (el) => {
+      if (el.dataset.rendered) return;
+      el.dataset.rendered = 'true';
+      const code = el.textContent?.trim() || '';
+      const { svg } = await mermaid.render(`m-${Math.random().toString(36).slice(2, 8)}`, code);
+      const container = el.parentElement!;
+      container.innerHTML = svg;
+    });
+  }
+
+  initDiagrams();
+  document.addEventListener('astro:after-swap', initDiagrams);
+</script>
+
+<style>
+  .diagram {
+    margin: 40px 0;
+    text-align: center;
+  }
+
+  .diagram-container {
+    background: #0f0f0f;
+    border: 1px solid #2e2e2e;
+    padding: 32px 24px;
+    overflow-x: auto;
+  }
+
+  .diagram-container :global(svg) {
+    max-width: 100%;
+    height: auto;
+  }
+
+  figcaption {
+    font-size: 0.8125rem;
+    color: #9a9590;
+    margin-top: 12px;
+    font-style: italic;
+  }
+
+  .mermaid-src {
+    color: #666;
+    font-size: 0.75rem;
+  }
+</style>

@@ -1,0 +1,157 @@
+---
+interface Props {
+  title?: string;
+  lines: { prompt?: boolean; text: string; delay?: number }[];
+}
+
+const { title = 'terminal', lines } = Astro.props;
+const id = `term-${Math.random().toString(36).slice(2, 8)}`;
+---
+
+<div class="terminal" id={id}>
+  <div class="terminal-header">
+    <div class="terminal-dots">
+      <span class="dot red"></span>
+      <span class="dot yellow"></span>
+      <span class="dot green"></span>
+    </div>
+    <span class="terminal-title">{title}</span>
+  </div>
+  <div class="terminal-body">
+    {lines.map((line, i) => (
+      <div class="terminal-line" data-index={i} data-delay={line.delay ?? (line.prompt ? 40 : 10)} style="opacity: 0;">
+        {line.prompt && <span class="prompt">$</span>}
+        <span class="text"></span>
+        <span class="full-text" style="display:none;">{line.text}</span>
+      </div>
+    ))}
+  </div>
+</div>
+
+<script>
+  function initTerminals() {
+    document.querySelectorAll('.terminal').forEach((terminal) => {
+      if (terminal.dataset.initialized) return;
+      terminal.dataset.initialized = 'true';
+
+      const lines = terminal.querySelectorAll('.terminal-line');
+      let currentLine = 0;
+
+      const observer = new IntersectionObserver(
+        (entries) => {
+          if (entries[0].isIntersecting) {
+            observer.disconnect();
+            typeLine();
+          }
+        },
+        { threshold: 0.3 }
+      );
+      observer.observe(terminal);
+
+      function typeLine() {
+        if (currentLine >= lines.length) return;
+        const line = lines[currentLine] as HTMLElement;
+        const textEl = line.querySelector('.text') as HTMLElement;
+        const fullText = (line.querySelector('.full-text') as HTMLElement).textContent || '';
+        const delay = parseInt(line.dataset.delay || '30');
+        const isPrompt = !!line.querySelector('.prompt');
+
+        line.style.opacity = '1';
+
+        if (isPrompt) {
+          let i = 0;
+          const type = () => {
+            if (i < fullText.length) {
+              textEl.textContent += fullText[i];
+              i++;
+              setTimeout(type, delay + Math.random() * 20);
+            } else {
+              currentLine++;
+              setTimeout(typeLine, 300);
+            }
+          };
+          type();
+        } else {
+          textEl.textContent = fullText;
+          currentLine++;
+          setTimeout(typeLine, 100);
+        }
+      }
+    });
+  }
+
+  initTerminals();
+  document.addEventListener('astro:after-swap', initTerminals);
+</script>
+
+<style>
+  .terminal {
+    background: #0a0a0a;
+    border: 1px solid #2e2e2e;
+    margin: 32px 0;
+    overflow: hidden;
+    font-family: 'Roboto Mono', 'SF Mono', 'Fira Code', monospace;
+    font-size: 0.8125rem;
+    line-height: 1.6;
+  }
+
+  .terminal-header {
+    background: #1a1a1a;
+    padding: 8px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    border-bottom: 1px solid #2e2e2e;
+  }
+
+  .terminal-dots {
+    display: flex;
+    gap: 6px;
+  }
+
+  .dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+  }
+
+  .dot.red { background: #ff5f57; }
+  .dot.yellow { background: #febc2e; }
+  .dot.green { background: #28c840; }
+
+  .terminal-title {
+    color: #666;
+    font-size: 0.75rem;
+  }
+
+  .terminal-body {
+    padding: 16px 20px;
+    min-height: 60px;
+  }
+
+  .terminal-line {
+    white-space: pre-wrap;
+    word-break: break-all;
+    color: #e0e0e0;
+    min-height: 1.6em;
+  }
+
+  .prompt {
+    color: #28c840;
+    margin-right: 8px;
+    user-select: none;
+  }
+
+  .prompt::before {
+    content: '';
+  }
+
+  .full-text {
+    display: none !important;
+  }
+
+  /* Output lines get dimmer color */
+  .terminal-line:not(:has(.prompt)) .text {
+    color: #999;
+  }
+</style>

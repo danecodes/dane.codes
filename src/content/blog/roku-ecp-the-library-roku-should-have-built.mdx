@@ -1,0 +1,181 @@
+---
+title: "roku-ecp: The Library Roku Should Have Built"
+date: "2026-04-14"
+description: "I got tired of hand-rolling HTTP requests to port 8060 like an animal, so I built a proper TypeScript client for the Roku External Control Protocol. No WebDriver. No Appium. No Java. No bullshit. Here's how it works and why it matters."
+tags: ["roku", "ott", "typescript", "open-source"]
+---
+
+import Terminal from '../../components/Terminal.astro';
+import Diagram from '../../components/Diagram.astro';
+
+Every Roku device ships with a hidden superpower that almost nobody uses correctly: the [External Control Protocol](https://developer.roku.com/docs/developer-program/dev-tools/external-control-api.md). It's an HTTP API sitting on port 8060 that lets you do basically anything — press buttons, launch apps, query device state, inspect the entire SceneGraph UI tree. It's been there for years. It's documented. It works.
+
+And somehow, in the year of our lord 2026, the official tooling for interacting with it is still "write your own `curl` commands and parse XML with your eyes."
+
+So I built [roku-ecp](https://github.com/danecodes/roku-ecp).
+
+## What ECP Actually Is
+
+For the uninitiated: ECP is Roku's way of letting external programs talk to the device over HTTP. Your Roku is a tiny web server. You send it requests, it does things. It's beautifully simple and criminally underutilized.
+
+<Diagram caption="Your code talks to port 8060. The Roku does the thing. That's it.">
+{`flowchart LR
+    A["Your Code<br/>(Node.js)"] -->|HTTP| B["Roku Device<br/>:8060"]
+    B -->|"POST /keypress"| C["Remote Control"]
+    B -->|"GET /query"| D["Device State"]
+    B -->|"GET /query/app-ui"| E["SceneGraph Tree"]
+    B -->|"POST /install"| F["App Lifecycle"]
+    style A fill:#242424,stroke:#fa520f,color:#ede9e3
+    style B fill:#1a1a1a,stroke:#ffa110,color:#ede9e3
+    style C fill:#0f0f0f,stroke:#2e2e2e,color:#9a9590
+    style D fill:#0f0f0f,stroke:#2e2e2e,color:#9a9590
+    style E fill:#0f0f0f,stroke:#2e2e2e,color:#9a9590
+    style F fill:#0f0f0f,stroke:#2e2e2e,color:#9a9590`}
+</Diagram>
+
+The problem is that "simple HTTP API" still means hand-managing URLs, parsing XML responses, remembering which key name is `Lit_` prefixed and which isn't, and generally doing a bunch of tedious plumbing every single time you want to automate something on a Roku.
+
+It's 2026. We shouldn't be concatenating URL strings like it's a CGI script.
+
+## The Old Way
+
+Here's what talking to a Roku looked like before. And I mean *every single time*. Every project. Every script. Every "I just need to do one quick thing."
+
+<Terminal title="the bad old days" lines={[
+  { prompt: true, text: "curl -d '' http://192.168.0.30:8060/keypress/Down" },
+  { text: "" },
+  { prompt: true, text: "curl -d '' http://192.168.0.30:8060/keypress/Down" },
+  { text: "" },
+  { prompt: true, text: "curl -d '' http://192.168.0.30:8060/keypress/Select" },
+  { text: "" },
+  { prompt: true, text: "curl http://192.168.0.30:8060/query/active-app" },
+  { text: '<?xml version="1.0" encoding="UTF-8" ?>' },
+  { text: '<active-app>' },
+  { text: '  <app id="12345" version="4.2.1">Some App</app>' },
+  { text: '</active-app>' },
+  { prompt: true, text: "# cool now parse that XML yourself I guess" },
+]} />
+
+You ever type `curl -d '' http://192.168.0.30:8060/keypress/Down` fourteen times in a row? I have. I've done it more times than I've called my mother. That's not engineering. That's a cry for help.
+
+And god forbid you need to inspect the UI tree. That's a `GET /query/app-ui` that returns like 40KB of raw XML. Hope you like angle brackets.
+
+## The New Way
+
+<Terminal title="roku-ecp" lines={[
+  { prompt: true, text: "npm install @danecodes/roku-ecp" },
+  { text: "added 1 package in 0.4s" },
+]} />
+
+That's it. One dependency. Zero native modules. No Java runtime lurking in the shadows waiting to consume 2GB of RAM for the privilege of pressing a button on a TV.
+
+Here's what the same workflow looks like now:
+
+```typescript
+import { EcpClient, Key } from '@danecodes/roku-ecp';
+
+const roku = await EcpClient.discover();
+
+await roku.press(Key.Down, { times: 3 });
+await roku.press(Key.Select);
+
+const app = await roku.queryActiveApp();
+console.log(app.name, app.version);
+```
+
+Five lines. Typed. Discoverable. No URL concatenation. No XML parsing. No wondering if the key is called `Select` or `select` or `OK` or whatever the hell Roku decided that day.
+
+## Auto-Discovery
+
+One of my favorite things. You don't need to know your Roku's IP address. roku-ecp uses SSDP (the same protocol your Roku uses to show up in the Roku app) to find devices on your network:
+
+<Terminal title="device discovery" lines={[
+  { prompt: true, text: "node -e \"const { EcpClient } = require('@danecodes/roku-ecp'); EcpClient.discover().then(r => console.log(r.ip))\"" },
+  { text: "192.168.0.30" },
+]} />
+
+Or if you're fancy and have multiple Rokus (no judgment):
+
+```typescript
+const devices = await EcpClient.discoverAll();
+// => [ EcpClient(192.168.0.30), EcpClient(192.168.0.42) ]
+```
+
+## CSS-Like Selectors for SceneGraph
+
+This is the part where it gets genuinely useful and not just "nice wrapper around curl."
+
+Roku's SceneGraph UI tree is XML. Big, nested, deeply annoying XML. roku-ecp parses it into a traversable tree and gives you CSS-like selectors to query it:
+
+```typescript
+import { parseUiXml, findElement, findFocused } from '@danecodes/roku-ecp';
+
+const tree = parseUiXml(await roku.queryAppUi());
+
+// Find by component type and name
+const btn = findElement(tree, 'AppButton#play_button');
+
+// Descendant selector
+const hero = findElement(tree, 'HomePage HomeHeroCarousel');
+
+// Direct child
+const label = findElement(tree, 'LayoutGroup > AppLabel');
+
+// What's focused right now?
+const focused = findFocused(tree);
+```
+
+If you've ever written a web test with CSS selectors, you already know how to navigate a Roku UI tree. That was the whole point. The Roku ecosystem has been stuck in "parse XML with regex" mode for years, and I wanted something that felt like the tools web developers have had since 2005.
+
+<Diagram caption="roku-ecp turns raw SceneGraph XML into something you can actually query.">
+{`flowchart TD
+    A["GET /query/app-ui"] -->|"Raw XML<br/>(40KB of pain)"| B["parseUiXml()"]
+    B --> C["UiNode Tree"]
+    C --> D["findElement(tree, 'AppButton#play')"]
+    C --> E["findFocused(tree)"]
+    C --> F["findElements(tree, 'Label')"]
+    C --> G["formatTree(tree, depth: 3)"]
+    style A fill:#242424,stroke:#fa520f,color:#ede9e3
+    style B fill:#242424,stroke:#ffa110,color:#ede9e3
+    style C fill:#1a1a1a,stroke:#ffa110,color:#ede9e3
+    style D fill:#0f0f0f,stroke:#2e2e2e,color:#9a9590
+    style E fill:#0f0f0f,stroke:#2e2e2e,color:#9a9590
+    style F fill:#0f0f0f,stroke:#2e2e2e,color:#9a9590
+    style G fill:#0f0f0f,stroke:#2e2e2e,color:#9a9590`}
+</Diagram>
+
+## The Full Picture
+
+Here's what roku-ecp actually covers:
+
+| Feature | What it does |
+|---------|-------------|
+| **Remote input** | Keypress, keydown/up, repeated press with delay, character-by-character typing |
+| **Device queries** | Device info, active app, installed apps, media player state |
+| **App lifecycle** | Launch, install, deep link, send input params, close |
+| **UI inspection** | Parse SceneGraph XML, CSS selectors, find focused element, format tree |
+| **Sideloading** | Deploy `.zip` to dev channel over digest auth |
+| **Screenshots** | Capture device screen as PNG buffer |
+| **Debug console** | Read BrightScript console output, send commands, parse for errors/crashes |
+| **Discovery** | SSDP auto-discovery of Roku devices on the network |
+
+All of that. One package. `@danecodes/roku-ecp`. No transitive dependency hell. No native binaries. No "please install Java 11 and also Maven and also cry."
+
+## Why This Matters
+
+Look, I've been building Roku apps for a long time. The platform is powerful and the hardware is everywhere — there are literally more Roku devices in the US than people in Canada. But the developer tooling has always been... let's say "character building."
+
+Every Roku team I've worked on — Hulu, Crunchyroll, everywhere — has had some version of these scripts lying around. Little Node scripts. Bash one-liners. Someone's Python thing that kind of works but only on their machine. Everyone is reinventing the same wheel, and the wheel is always a little wobbly.
+
+roku-ecp is my attempt to build the wheel once, properly, so nobody has to think about port 8060 ever again.
+
+## What's Next
+
+This library is the foundation. Next post, I'll write about [roku-mcp](https://github.com/danecodes/roku-mcp) — an MCP server that sits on top of roku-ecp and lets AI agents like Claude directly control your Roku. Inspect the UI, navigate menus, take screenshots, debug crashes — all through natural language tool calls.
+
+Because if I'm going to automate my TV, I'm going to *really* automate my TV.
+
+<Terminal title="coming soon" lines={[
+  { prompt: true, text: "# next post: teaching Claude to watch anime for me" },
+  { text: "...priorities." },
+]} />
