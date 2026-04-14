@@ -1,0 +1,192 @@
+---
+title: "roku-mcp: Teaching AI Agents to Use a Television"
+date: "2026-04-15"
+description: "I built an MCP server that lets Claude, Copilot, and Codex directly control a Roku — inspect the UI, navigate menus, take screenshots, run smoke tests. All you need is the device IP and some basic knowledge of your app's layout. Here's what that looks like in practice."
+tags: ["roku", "mcp", "ai", "ott", "open-source"]
+---
+
+import Terminal from '../../components/Terminal.astro';
+import Diagram from '../../components/Diagram.astro';
+
+In the [last post](https://dane.codes/blog/roku-ecp-the-library-roku-should-have-built/), I wrote about [roku-ecp](https://github.com/danecodes/roku-ecp) — a TypeScript client that wraps Roku's External Control Protocol into something a human can actually use. That library solved the "why am I writing curl commands in 2026" problem.
+
+This post is about what happens when you hand those capabilities to an AI agent and say "here, you figure it out."
+
+[roku-mcp](https://github.com/danecodes/roku-mcp) is an MCP server that sits on top of roku-ecp and exposes every Roku interaction as a tool that AI agents can call. Claude Code, Cursor, Copilot, Codex — anything that speaks [Model Context Protocol](https://modelcontextprotocol.io/) can now see your TV screen, press buttons, launch apps, read the debug console, and run smoke tests.
+
+And the wild part? It's actually good at it.
+
+## The Setup
+
+Five minutes. I'm not exaggerating.
+
+<Terminal title="installation" lines={[
+  { prompt: true, text: "npm install -g @danecodes/roku-mcp" },
+  { text: "added 1 package in 0.6s" },
+]} />
+
+Then drop this in your `.mcp.json`:
+
+```json
+{
+  "mcpServers": {
+    "roku": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "--package", "@danecodes/roku-mcp", "roku-mcp-server"],
+      "env": {
+        "ROKU_DEVICE_IP": "192.168.0.30"
+      }
+    }
+  }
+}
+```
+
+That's it. Your AI agent now has 20+ tools for controlling a Roku device. The entire Roku is now a peripheral.
+
+## What the Agent Can See
+
+This is the part people don't get until they see it. The agent isn't just blindly mashing buttons. It can read the SceneGraph UI tree — the actual component hierarchy that makes up what's on screen. It knows what's focused. It knows what text is displayed. It can find elements by CSS-like selectors.
+
+<Diagram caption="The agent has eyes. It sees the UI tree, acts on it, and verifies the result.">
+{`flowchart LR
+    A["AI Agent<br/>(Claude, Copilot, etc.)"] -->|"1. MCP Tool Call"| B["roku-mcp<br/>Server"]
+    B -->|"2. roku-ecp"| C["Roku Device<br/>:8060"]
+    C -->|"3. SceneGraph XML"| B
+    B -->|"4. Parsed UI Tree"| A
+    A -->|"5. Next action"| B
+    style A fill:#242424,stroke:#fa520f,color:#ede9e3
+    style B fill:#1a1a1a,stroke:#ffa110,color:#ede9e3
+    style C fill:#0f0f0f,stroke:#2e2e2e,color:#9a9590`}
+</Diagram>
+
+The loop is: agent reads the screen, decides what to do, does it, reads the screen again. Sound familiar? That's how a person uses a TV. Except the agent is faster and doesn't get distracted by whatever's autoplaying on the home screen.
+
+## The Secret Ingredient: App Knowledge
+
+Here's the thing nobody tells you about AI-powered device automation: the AI doesn't need to be brilliant. It needs to be *informed*.
+
+If you tell Claude "navigate to the search screen on Crunchyroll," it has no idea what that means structurally. The app could have any layout. The nav could be on the left, the top, behind a hamburger menu, or accessible only by pressing Back three times and then Right.
+
+But if you give the agent a little context — even just a few sentences — everything changes. As of v0.3.2, roku-mcp has a built-in way to do this: drop a `roku-app.md` file in your project root.
+
+```markdown
+## Crunchyroll Navigation
+
+The app uses a left-side nav menu. Press Left from any content screen
+to open it. Menu items from top to bottom: Home, Browse, Simulcasts,
+My Lists, Settings. The Browse screen has genre rows. Select a genre
+to see the content grid.
+Search is accessible from the top of the nav menu.
+```
+
+That's it. The MCP server reads it at startup and feeds it to every connected agent automatically. No config needed — if the file exists, it's used. You can also set `ROKU_APP_CONTEXT` in your env to point at a different path.
+
+That paragraph, plus the ability to read the UI tree, is enough for an AI agent to navigate an entire streaming application. It doesn't need a complete map. It needs the same rough mental model that a QA tester builds in their first hour with the app.
+
+Claude Code users: you can also just put this in your `CLAUDE.md` and it works the same way — the agent picks it up as project context. The `roku-app.md` approach is nice because it's tool-agnostic and travels with the MCP server, but use whichever fits your workflow.
+
+## Actual Conversations I've Had With My TV
+
+This is a real workflow. Not a demo. Not a mockup. This is what it actually looks like when you point Claude at a Roku.
+
+<Terminal title="navigating to a specific show" lines={[
+  { prompt: true, text: "find 'one piece' on crunchyroll and start the latest episode" },
+  { text: "" },
+  { text: "→ roku_press_key(key: 'Home')" },
+  { text: "→ roku_launch(channel_id: 'dev')" },
+  { text: "→ roku_wait_for(selector: 'HomeScreen', timeout: 10000)" },
+  { text: "→ roku_press_key(key: 'Up', times: 5)    // reset to top nav" },
+  { text: "→ roku_press_key(key: 'Select')           // open search" },
+  { text: "→ roku_type_text(text: 'one piece')" },
+  { text: "→ roku_wait_for(selector: 'SearchResultItem', timeout: 5000)" },
+  { text: "→ roku_press_key(key: 'Down')" },
+  { text: "→ roku_press_key(key: 'Select')" },
+  { text: "→ roku_find_element(selector: 'EpisodeShelf MarkLabel')" },
+  { text: "→ roku_press_key(key: 'Select')" },
+  { text: "→ roku_media_player()" },
+  { text: "" },
+  { text: '  Playing: One Piece - Episode 1122 "The Brain of the Crew"' },
+  { text: "  State: play | Position: 00:00:04 | Duration: 00:23:41" },
+]} />
+
+The agent figured out the navigation. It used the search. It found the latest episode by reading the UI. It confirmed playback started. I typed one sentence.
+
+## Smoke Testing a Dev Build
+
+This is where it gets practical. Not "cool demo" practical — "my engineering manager wants to see this" practical.
+
+<Terminal title="sideload and smoke test" lines={[
+  { prompt: true, text: "sideload ./builds/latest.zip and run a smoke test" },
+  { text: "" },
+  { text: "→ roku_sideload_and_watch(zip_path: './builds/latest.zip', duration: 30000)" },
+  { text: "" },
+  { text: "  PASS: Install Success — no errors in 30s of console output" },
+  { text: "  Errors: 0 | Crashes: 0 | Exceptions: 0" },
+  { text: "" },
+  { text: "→ roku_smoke_test(content_id: 'GG5H5XQ7R', media_type: 'episode')" },
+  { text: "" },
+  { text: "  PASS: App launched, UI rendered, and playback started" },
+  { text: "  ✓ launch     — Deep linked to 'GG5H5XQ7R' in channel dev" },
+  { text: "  ✓ ui_visible — UI rendered after 2340ms" },
+  { text: "  ✓ playback   — Player reached 'play' after 8710ms" },
+]} />
+
+Sideload a zip, watch the console for BrightScript errors, deep link to a specific piece of content, verify the UI renders, verify playback starts, report pass/fail. That's a real CI-quality smoke test, driven entirely by an AI agent, in about 45 seconds.
+
+Every Roku team I've ever been on has wanted this. The test infrastructure to do it traditionally would be Selenium Grid or Appium — Java dependencies, flaky WebDriver connections, a dedicated test device farm. This is a single npm package and an HTTP connection to port 8060.
+
+## The Full Toolkit
+
+The MCP server exposes these tools to the agent:
+
+| Category | Tools | What they do |
+|----------|-------|-------------|
+| **Vision** | `roku_ui_tree`, `roku_find_element`, `roku_focused_element`, `roku_screen_name`, `roku_screenshot` | Read the screen, find elements, take screenshots |
+| **Control** | `roku_press_key`, `roku_type_text`, `roku_launch`, `roku_deep_link`, `roku_close_app`, `roku_volume` | Navigate, type, launch apps, control playback |
+| **State** | `roku_device_info`, `roku_active_app`, `roku_media_player`, `roku_installed_apps` | Query what the device is doing |
+| **Debug** | `roku_console_log`, `roku_console_command`, `roku_console_watch` | Read BrightScript console, send debug commands |
+| **Testing** | `roku_wait_for`, `roku_assert_element`, `roku_sideload_and_watch`, `roku_smoke_test`, `roku_cert_preflight`, `roku_chanperf_sample` | Full shift-left QA pipeline |
+
+That last row is important. `roku_cert_preflight` runs through the Roku certification checklist — back navigation, Home key exit, relaunch behavior, error scanning. The stuff that gets your channel rejected from the Roku store. An AI agent can now run your cert checklist for you.
+
+## Why This Actually Matters
+
+I've been building Roku apps for a decade. The platform testing story has always been: you put a device on your desk, you press buttons manually, you squint at the BrightScript console, and you hope you catch the crash before the cert team does.
+
+The tools to automate this have always existed in theory — ECP has been there the whole time. But the gap between "there's an HTTP API" and "I can have a conversation with my TV" was too wide for most teams to bridge. You'd need custom scripting, XML parsing, state management, error handling, and the patience of a person who enjoys writing infrastructure that nobody will ever thank you for.
+
+roku-mcp closes that gap. Give it a device IP, give the agent some basic app knowledge, and you've got a QA automation system that can navigate your app, verify behavior, catch crashes, and report results — all through natural language.
+
+<Diagram caption="The shift: from manual QA to conversational QA.">
+{`flowchart LR
+    subgraph Before["Before"]
+        direction TB
+        B1["Manual button pressing"] --> B2["Squint at console"] --> B3["Hope for the best"]
+    end
+    subgraph After["After"]
+        direction TB
+        A1["'Test the browse flow'"] --> A2["Agent navigates + verifies"] --> A3["Pass/fail report"]
+    end
+    Before -.->|"roku-mcp"| After
+    style Before fill:#1a1a1a,stroke:#2e2e2e,color:#9a9590
+    style After fill:#1a1a1a,stroke:#fa520f,color:#ede9e3
+    style B1 fill:#0f0f0f,stroke:#2e2e2e,color:#9a9590
+    style B2 fill:#0f0f0f,stroke:#2e2e2e,color:#9a9590
+    style B3 fill:#0f0f0f,stroke:#2e2e2e,color:#9a9590
+    style A1 fill:#242424,stroke:#ffa110,color:#ede9e3
+    style A2 fill:#242424,stroke:#ffa110,color:#ede9e3
+    style A3 fill:#242424,stroke:#ffa110,color:#ede9e3`}
+</Diagram>
+
+Is it going to replace a full QA team? No. Don't be weird about it. But it's going to catch the dumb stuff faster, it's going to run the repetitive checks without complaining, and it's going to do it at 2 AM when you push a build and nobody's awake to manually verify it.
+
+## Get It
+
+```
+npm install -g @danecodes/roku-mcp
+```
+
+Works with Claude Code, Cursor, Copilot, Codex, or anything else that speaks MCP. Repo is at [github.com/danecodes/roku-mcp](https://github.com/danecodes/roku-mcp).
+
+The TV is listening. Might as well talk to it.
