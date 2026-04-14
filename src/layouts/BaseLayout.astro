@@ -6,14 +6,14 @@ interface Props {
 
 const { title, description = 'Dane Hesseldahl — Senior Roku Developer & OTT Engineer with 25+ years experience building streaming TV platforms at Crunchyroll, Hulu, and Disney. BrightScript, SceneGraph, connected TV, engineering leadership.' } = Astro.props;
 const currentPath = Astro.url.pathname;
-const canonicalURL = new URL(currentPath, 'https://danecodes.com').href;
+const canonicalURL = new URL(currentPath, 'https://dane.codes').href;
 const siteTitle = `${title} — Dane Hesseldahl | Roku & OTT Streaming Engineer`;
 
 const jsonLd = JSON.stringify({
   "@context": "https://schema.org",
   "@type": "Person",
   "name": "Dane Hesseldahl",
-  "url": "https://danecodes.com",
+  "url": "https://dane.codes",
   "jobTitle": "Senior Software Engineer — Roku",
   "worksFor": {
     "@type": "Organization",
@@ -53,14 +53,14 @@ const jsonLd = JSON.stringify({
     <meta property="og:url" content={canonicalURL} />
     <meta property="og:title" content={siteTitle} />
     <meta property="og:description" content={description} />
-    <meta property="og:site_name" content="danecodes.com" />
-    <meta property="og:image" content="https://danecodes.com/favicon.svg" />
+    <meta property="og:site_name" content="dane.codes" />
+    <meta property="og:image" content="https://dane.codes/favicon.svg" />
 
     <!-- Twitter Card -->
     <meta name="twitter:card" content="summary" />
     <meta name="twitter:title" content={siteTitle} />
     <meta name="twitter:description" content={description} />
-    <meta name="twitter:image" content="https://danecodes.com/favicon.svg" />
+    <meta name="twitter:image" content="https://dane.codes/favicon.svg" />
 
     <!-- Structured Data -->
     <script type="application/ld+json" set:html={jsonLd} />
@@ -91,7 +91,7 @@ const jsonLd = JSON.stringify({
 
     <footer>
       <div class="container footer-inner">
-        <p>&copy; {new Date().getFullYear()} danecodes.com</p>
+        <p>&copy; {new Date().getFullYear()} dane.codes</p>
       </div>
     </footer>
 
