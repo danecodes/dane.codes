@@ -1,0 +1,98 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout title="Contact" description="Get in touch with Dane Hesseldahl.">
+  <section class="page-header">
+    <div class="container">
+      <h1>Contact</h1>
+      <p class="page-sub">Want to chat? Reach out.</p>
+    </div>
+  </section>
+
+  <section class="contact-content">
+    <div class="container contact-grid">
+      <div class="contact-info">
+        <h4>Get in touch</h4>
+        <p>I'm always open to interesting conversations, collaboration opportunities, or just saying hi.</p>
+
+        <div class="contact-links">
+          <a href="mailto:dane@danecodes.com" class="contact-link">
+            <span class="contact-label">Email</span>
+            <span>dane@danecodes.com</span>
+          </a>
+          <a href="https://www.linkedin.com/in/daneh/" class="contact-link">
+            <span class="contact-label">LinkedIn</span>
+            <span>linkedin.com/in/daneh</span>
+          </a>
+          <a href="https://github.com/danecodes" class="contact-link">
+            <span class="contact-label">GitHub</span>
+            <span>github.com/danecodes</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .page-header {
+    padding: 100px 0 60px;
+    background: linear-gradient(180deg, var(--color-bg) 0%, var(--color-surface) 100%);
+  }
+
+  .page-sub {
+    font-size: 1.125rem;
+    color: var(--color-text-muted);
+    margin-top: 12px;
+  }
+
+  .contact-content {
+    padding-top: 48px;
+  }
+
+  .contact-grid {
+    max-width: 600px;
+  }
+
+  .contact-info h4 {
+    margin-bottom: 12px;
+  }
+
+  .contact-info > p {
+    color: var(--color-text-muted);
+    margin-bottom: 32px;
+  }
+
+  .contact-links {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .contact-link {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 16px;
+    text-decoration: none;
+    color: var(--color-text);
+    transition: background 0.15s ease;
+    border-left: 2px solid transparent;
+  }
+
+  .contact-link:hover {
+    background: var(--color-surface);
+    border-left-color: var(--color-orange);
+    color: var(--color-text);
+  }
+
+  .contact-label {
+    font-weight: 500;
+    font-size: 0.8125rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--color-text-muted);
+    min-width: 80px;
+  }
+</style>

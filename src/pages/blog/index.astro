@@ -1,0 +1,128 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getCollection } from 'astro:content';
+
+const posts = (await getCollection('blog')).sort(
+  (a, b) => new Date(b.data.date).getTime() - new Date(a.data.date).getTime()
+);
+---
+
+<BaseLayout title="Blog" description="Dane writes about code, projects, and things learned.">
+  <section class="page-header">
+    <div class="container">
+      <h1>Blog</h1>
+      <p class="page-sub">Writing about what I'm building and learning.</p>
+    </div>
+  </section>
+
+  <section class="posts">
+    <div class="container">
+      {posts.length === 0 && (
+        <p class="empty">No posts yet. Check back soon.</p>
+      )}
+      <div class="post-list">
+        {posts.map((post) => (
+          <a href={`/blog/${post.id}`} class="post-item">
+            <div class="post-meta">
+              <time datetime={new Date(post.data.date).toISOString()}>
+                {new Date(post.data.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+              </time>
+              {post.data.tags && (
+                <div class="post-tags">
+                  {post.data.tags.map((tag: string) => (
+                    <span class="tag">{tag}</span>
+                  ))}
+                </div>
+              )}
+            </div>
+            <h4>{post.data.title}</h4>
+            {post.data.description && <p>{post.data.description}</p>}
+          </a>
+        ))}
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .page-header {
+    padding: 100px 0 60px;
+    background: linear-gradient(180deg, var(--color-bg) 0%, var(--color-surface) 100%);
+  }
+
+  .page-sub {
+    font-size: 1.125rem;
+    color: var(--color-text-muted);
+    margin-top: 12px;
+  }
+
+  .posts {
+    padding-top: 48px;
+  }
+
+  .empty {
+    color: var(--color-text-muted);
+  }
+
+  .post-list {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .post-item {
+    display: block;
+    padding: 24px;
+    text-decoration: none;
+    color: var(--color-text);
+    transition: background 0.15s ease;
+    border-left: 2px solid transparent;
+  }
+
+  .post-item:hover {
+    background: var(--color-surface);
+    border-left-color: var(--color-orange);
+    color: var(--color-text);
+  }
+
+  .post-meta {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 8px;
+  }
+
+  .post-meta time {
+    font-size: 0.8125rem;
+    font-weight: 500;
+    color: var(--color-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+  }
+
+  .post-tags {
+    display: flex;
+    gap: 6px;
+  }
+
+  .tag {
+    font-size: 0.6875rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 2px 8px;
+    background: var(--color-surface-raised);
+    color: var(--color-sunshine-500);
+    border: 1px solid var(--color-border);
+  }
+
+  .post-item h4 {
+    margin-bottom: 4px;
+  }
+
+  .post-item p {
+    font-size: 0.9375rem;
+    color: var(--color-text-muted);
+    margin-bottom: 0;
+  }
+</style>

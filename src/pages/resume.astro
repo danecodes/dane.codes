@@ -1,0 +1,244 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout title="Resume" description="Resume of Dane Hesseldahl — Senior Roku Developer & OTT Streaming Engineer at Crunchyroll. 25+ years experience in BrightScript, SceneGraph, connected TV, TV platforms, and engineering leadership at Hulu and Disney Streaming.">
+  <section class="page-header">
+    <div class="container">
+      <h1>Resume</h1>
+      <p class="page-sub">25+ years building for the web and living room screens.</p>
+    </div>
+  </section>
+
+  <section class="resume-content">
+    <div class="container resume-grid">
+      <div class="resume-main">
+        <h2>Experience</h2>
+
+        <div class="job">
+          <div class="job-header">
+            <h4>Senior Software Engineer — Roku</h4>
+            <span class="job-date">Jun 2024 &mdash; Present</span>
+          </div>
+          <p class="job-company">Crunchyroll &middot; Seattle, WA (Remote)</p>
+          <ul>
+            <li>Senior engineer on the Roku team, shaping the streaming experience for millions of anime fans worldwide.</li>
+            <li>Focus on performance, accessibility, and building great TV interfaces.</li>
+          </ul>
+        </div>
+
+        <div class="job">
+          <div class="job-header">
+            <h4>Director of Engineering</h4>
+            <span class="job-date">Aug 2023 &mdash; Feb 2024</span>
+          </div>
+          <p class="job-company">FrontRow</p>
+          <ul>
+            <li>Led engineering team, driving technical strategy and execution.</li>
+          </ul>
+        </div>
+
+        <div class="job">
+          <div class="job-header">
+            <h4>Design Engineering</h4>
+            <span class="job-date">Feb 2022 &mdash; Aug 2023</span>
+          </div>
+          <p class="job-company">Disney Streaming &middot; Seattle, WA</p>
+          <ul>
+            <li>Developed internal tooling and systems bridging design and engineering across Disney+, Hulu, and other high-profile products.</li>
+          </ul>
+        </div>
+
+        <div class="job">
+          <div class="job-header">
+            <h4>Hulu — Multiple Roles</h4>
+            <span class="job-date">2013 &mdash; 2022</span>
+          </div>
+          <p class="job-company">Hulu &middot; Boston / Santa Monica</p>
+          <ul>
+            <li><strong>Senior Engineering Manager — Living Room (Roku)</strong> (2021–2022): Led the team building Hulu clients for Xbox, PlayStation, Apple TV, Roku, FireTV, and more.</li>
+            <li><strong>Senior Software Development Lead — Optimization & Experimentation</strong> (2017–2021): Led A/B testing and experimentation platform across Hulu.</li>
+            <li><strong>Senior Software Development Lead — TV Platforms</strong> (2016–2017): Built and maintained the UI layer for Hulu's TV platform clients.</li>
+          </ul>
+        </div>
+
+        <div class="job">
+          <div class="job-header">
+            <h4>Nordstrom — Analytics Tech Ops</h4>
+            <span class="job-date">Nov 2014 &mdash; Jul 2016</span>
+          </div>
+          <p class="job-company">Nordstrom &middot; Greater Seattle Area</p>
+          <ul>
+            <li><strong>Lead Developer</strong>: Led front-end development with clean, standards-based HTML5, CSS, and JavaScript. Cross-browser, compliant markup.</li>
+            <li><strong>Senior Interactive Developer</strong>: Specialized in testing and data/BI platform integrations across nordstrom.com (Maxymiser, Coremetrics, BrightTag).</li>
+          </ul>
+        </div>
+
+        <h2 class="section-heading">Education</h2>
+
+        <div class="job">
+          <div class="job-header">
+            <h4>Software Engineering</h4>
+            <span class="job-date">1999 &mdash; 2003</span>
+          </div>
+          <p class="job-company">Oregon Institute of Technology</p>
+        </div>
+
+        <h2 class="section-heading">Awards</h2>
+
+        <div class="job">
+          <div class="job-header">
+            <h4>IAWTV Award: Best Website for "The Guild"</h4>
+            <span class="job-date">Jan 2012</span>
+          </div>
+          <p class="job-company">International Academy of Web Television</p>
+        </div>
+      </div>
+
+      <aside class="resume-sidebar">
+        <h5>Skills</h5>
+        <div class="skill-tags">
+          <span class="tag">Roku</span>
+          <span class="tag">BrightScript</span>
+          <span class="tag">SceneGraph</span>
+          <span class="tag">OTT</span>
+          <span class="tag">CTV / Connected TV</span>
+          <span class="tag">Streaming</span>
+          <span class="tag">TV Platforms</span>
+          <span class="tag">JavaScript</span>
+          <span class="tag">TypeScript</span>
+          <span class="tag">React</span>
+          <span class="tag">Design Systems</span>
+          <span class="tag">A/B Testing</span>
+          <span class="tag">HTML5 / CSS</span>
+          <span class="tag">Node.js</span>
+          <span class="tag">Engineering Leadership</span>
+          <span class="tag">Software Project Management</span>
+        </div>
+
+        <h5>Links</h5>
+        <ul class="sidebar-links">
+          <li><a href="https://github.com/dane">GitHub</a></li>
+          <li><a href="https://www.linkedin.com/in/daneh/">LinkedIn</a></li>
+          <li><a href="/contact">Contact</a></li>
+        </ul>
+      </aside>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .page-header {
+    padding: 100px 0 60px;
+    background: linear-gradient(180deg, var(--color-bg) 0%, var(--color-surface) 100%);
+  }
+
+  .page-sub {
+    font-size: 1.125rem;
+    color: var(--color-text-muted);
+    margin-top: 12px;
+  }
+
+  .resume-content {
+    padding-top: 48px;
+  }
+
+  .resume-grid {
+    display: grid;
+    grid-template-columns: 1fr 280px;
+    gap: 64px;
+  }
+
+  h2 {
+    margin-bottom: 32px;
+  }
+
+  .section-heading {
+    margin-top: 48px;
+  }
+
+  .job {
+    margin-bottom: 32px;
+  }
+
+  .job-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .job-date {
+    font-size: 0.8125rem;
+    font-weight: 500;
+    color: var(--color-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+  }
+
+  .job-company {
+    font-weight: 500;
+    color: var(--color-text-muted);
+    margin-bottom: 8px;
+  }
+
+  .job ul {
+    padding-left: 20px;
+  }
+
+  .job li {
+    font-size: 0.9375rem;
+    margin-bottom: 6px;
+    color: var(--color-text-muted);
+  }
+
+  .job li :global(strong) {
+    color: var(--color-ivory);
+  }
+
+  .resume-sidebar h5 {
+    margin-bottom: 16px;
+  }
+
+  .resume-sidebar h5:not(:first-child) {
+    margin-top: 32px;
+  }
+
+  .skill-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .tag {
+    font-size: 0.75rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 4px 10px;
+    background: var(--color-surface-raised);
+    color: var(--color-sunshine-500);
+    border: 1px solid var(--color-border);
+  }
+
+  .sidebar-links {
+    list-style: none;
+  }
+
+  .sidebar-links li {
+    margin-bottom: 8px;
+  }
+
+  .sidebar-links a {
+    font-size: 0.9375rem;
+    font-weight: 500;
+  }
+
+  @media (max-width: 768px) {
+    .resume-grid {
+      grid-template-columns: 1fr;
+      gap: 48px;
+    }
+  }
+</style>
