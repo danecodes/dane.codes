@@ -87,7 +87,7 @@ Five lines. Typed. Discoverable. No URL concatenation. No XML parsing. No wonder
 
 ## Auto-Discovery
 
-One of my favorite things. You don't need to know your Roku's IP address. roku-ecp uses SSDP (the same protocol your Roku uses to show up in the Roku app) to find devices on your network:
+You don't need to know your Roku's IP address. roku-ecp uses SSDP (the same protocol your Roku uses to show up in the Roku app) to find devices on your network:
 
 <Terminal title="device discovery" lines={[
   { prompt: true, text: "node -e \"const { EcpClient } = require('@danecodes/roku-ecp'); EcpClient.discover().then(r => console.log(r.ip))\"" },
