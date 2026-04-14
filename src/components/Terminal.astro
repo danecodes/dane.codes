@@ -5,10 +5,9 @@ interface Props {
 }
 
 const { title = 'terminal', lines } = Astro.props;
-const id = `term-${Math.random().toString(36).slice(2, 8)}`;
 ---
 
-<div class="terminal" id={id}>
+<div class="terminal">
   <div class="terminal-header">
     <div class="terminal-dots">
       <span class="dot red"></span>
@@ -19,10 +18,9 @@ const id = `term-${Math.random().toString(36).slice(2, 8)}`;
   </div>
   <div class="terminal-body">
     {lines.map((line, i) => (
-      <div class="terminal-line" data-index={i} data-delay={line.delay ?? (line.prompt ? 40 : 10)} style="opacity: 0;">
+      <div class="terminal-line" data-index={i} data-delay={line.delay ?? (line.prompt ? 40 : 10)}>
         {line.prompt && <span class="prompt">$</span>}
-        <span class="text"></span>
-        <span class="full-text" style="display:none;">{line.text}</span>
+        <span class="text">{line.text}</span>
       </div>
     ))}
   </div>
@@ -30,11 +28,22 @@ const id = `term-${Math.random().toString(36).slice(2, 8)}`;
 
 <script>
   function initTerminals() {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
     document.querySelectorAll('.terminal').forEach((terminal) => {
       if (terminal.dataset.initialized) return;
       terminal.dataset.initialized = 'true';
 
-      const lines = terminal.querySelectorAll('.terminal-line');
+      const lines = terminal.querySelectorAll('.terminal-line') as NodeListOf<HTMLElement>;
+      const originalTexts: string[] = [];
+
+      lines.forEach((line, i) => {
+        const textEl = line.querySelector('.text') as HTMLElement;
+        originalTexts[i] = textEl.textContent || '';
+        textEl.textContent = '';
+        line.classList.add('animate-hidden');
+      });
+
       let currentLine = 0;
 
       const observer = new IntersectionObserver(
@@ -50,13 +59,13 @@ const id = `term-${Math.random().toString(36).slice(2, 8)}`;
 
       function typeLine() {
         if (currentLine >= lines.length) return;
-        const line = lines[currentLine] as HTMLElement;
+        const line = lines[currentLine];
         const textEl = line.querySelector('.text') as HTMLElement;
-        const fullText = (line.querySelector('.full-text') as HTMLElement).textContent || '';
+        const fullText = originalTexts[currentLine];
         const delay = parseInt(line.dataset.delay || '30');
         const isPrompt = !!line.querySelector('.prompt');
 
-        line.style.opacity = '1';
+        line.classList.remove('animate-hidden');
 
         if (isPrompt) {
           let i = 0;
@@ -136,18 +145,14 @@ const id = `term-${Math.random().toString(36).slice(2, 8)}`;
     min-height: 1.6em;
   }
 
+  .terminal-line.animate-hidden {
+    opacity: 0;
+  }
+
   .prompt {
     color: #28c840;
     margin-right: 8px;
     user-select: none;
-  }
-
-  .prompt::before {
-    content: '';
-  }
-
-  .full-text {
-    display: none !important;
   }
 
   /* Output lines get dimmer color */
