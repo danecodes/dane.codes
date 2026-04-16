@@ -1,0 +1,351 @@
+---
+import UncleJesseLayout from '../../layouts/UncleJesseLayout.astro';
+
+const features = [
+  { icon: '🎯', title: 'CSS-Like Selectors', desc: 'Query SceneGraph nodes with familiar syntax. <code>HomeScreen RowList</code>, <code>#title</code>, <code>Label[text="Home"]</code>.' },
+  { icon: '🔄', title: 'LiveElement', desc: 'Persistent element references that re-query the device on each call. Chain selectors, actions, and assertions.' },
+  { icon: '🧭', title: 'focusPath', desc: 'Chainable D-pad navigation builder. Press keys, assert focus, collect all failures. Visual replay with screenshots.' },
+  { icon: '📄', title: 'Page Objects', desc: 'BasePage and BaseComponent — the same pattern used in production Roku test suites. Drop-in migration from Appium.' },
+  { icon: '🖥️', title: 'Multi-Device', desc: 'DevicePool manages parallel test execution across multiple Roku devices. Acquire, test, release.' },
+  { icon: '📊', title: 'CTRF Reports', desc: 'Generate Common Test Reporting Format output for CI dashboards, Databricks, and cross-team analytics.' },
+  { icon: '📸', title: 'Visual Replay', desc: 'Record screenshots at each focusPath step. Output a self-contained HTML debugger with scrubber and tree view.' },
+  { icon: '🪵', title: 'Log Capture', desc: 'Stream and parse BrightScript console output. Catch errors, crashes, and backtraces as structured data.' },
+  { icon: '🧪', title: 'Mock Server', desc: 'Deterministic test data with <code>@danecodes/roku-mock</code>. Manage scenarios, verify API calls, inject state.' },
+];
+
+const packages = [
+  { name: '@danecodes/uncle-jesse-core', desc: 'TVDevice, LiveElement, BasePage, BaseComponent, SelectorEngine, RegistryState, DevicePool' },
+  { name: '@danecodes/uncle-jesse-roku', desc: 'Roku adapter, media player, log capture via roku-ecp and roku-log' },
+  { name: '@danecodes/uncle-jesse-test', desc: 'focusPath, vitest matchers, vitest plugin, replay debugger' },
+  { name: 'uncle-jesse', desc: 'CLI (test, discover, sideload) and reporters (console, JUnit, CTRF)' },
+];
+---
+
+<UncleJesseLayout title="E2E Testing for Smart TVs">
+  <section class="hero">
+    <div class="uj-container">
+      <div class="hero-badge">Open Source</div>
+      <h1>E2E testing for<br />smart TVs.</h1>
+      <p class="hero-sub">TypeScript. Off-device. Over HTTP. No Appium, no Selenium, no Java.<br />Your tests run in Node and talk to the device on port 8060.</p>
+      <div class="hero-install">
+        <code class="install-cmd">npm install @danecodes/uncle-jesse-core @danecodes/uncle-jesse-roku @danecodes/uncle-jesse-test</code>
+      </div>
+      <div class="hero-cta">
+        <a href="/uncle-jesse/docs" class="btn btn-primary">Get Started</a>
+        <a href="/uncle-jesse/migration" class="btn btn-ghost">Migrate from Appium</a>
+        <a href="https://github.com/danecodes/uncle-jesse" class="btn btn-ghost" target="_blank" rel="noopener">GitHub</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="code-demo">
+    <div class="uj-container">
+      <div class="demo-grid">
+        <div class="demo-text">
+          <h2>Feels like Playwright.<br />Built for the living room.</h2>
+          <p>If you've written web E2E tests, you already know the API. Query elements, assert state, navigate with D-pad input. Uncle Jesse handles the Roku-specific plumbing.</p>
+        </div>
+        <div class="demo-code">
+          <pre><code>{`const tv = new RokuAdapter({
+  ip: '192.168.1.100',
+  devPassword: 'rokudev',
+});
+await tv.connect();
+await tv.launchApp('dev');
+
+// CSS-like selectors on SceneGraph
+const grid = await tv.$('HomeScreen RowList');
+const title = await tv.$('Label#screenTitle');
+
+// Navigate and assert
+await tv.press('right', { times: 3 });
+await tv.select();
+
+const focused = await tv.getFocusedElement();
+expect(focused?.getAttribute('title'))
+  .toBe('My List');`}</code></pre>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="features">
+    <div class="uj-container">
+      <h2>Everything you need to test a TV app.</h2>
+      <div class="feature-grid">
+        {features.map((f) => (
+          <div class="feature-card">
+            <span class="feature-icon">{f.icon}</span>
+            <h4>{f.title}</h4>
+            <p set:html={f.desc} />
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="focus-path-section">
+    <div class="uj-container">
+      <div class="demo-grid reverse">
+        <div class="demo-code">
+          <pre><code>{`const result = await focusPath(tv)
+  .press('right')
+    .expectFocus('[title="featured-2"]')
+  .press('right')
+    .expectFocus('[title="featured-3"]')
+  .press('down')
+    .expectFocus('[title="recent-2"]')
+  .verify();
+
+expect(result.passed).toBe(true);
+
+// With visual replay recording
+const recorded = await focusPath(tv, {
+  record: true,
+  testName: 'grid-nav',
+}).press('right')
+  .expectFocus('[title="featured-2"]')
+  .verify();
+
+await saveReplay(recorded.replay, './results');`}</code></pre>
+        </div>
+        <div class="demo-text">
+          <h2>focusPath: test D-pad navigation in one chain.</h2>
+          <p>Press keys, assert where focus lands, collect all failures instead of stopping at the first one. Enable <code>record: true</code> to capture screenshots and tree snapshots at every step — outputs a self-contained HTML replay debugger.</p>
+          <p>Every step waits for focus to stabilize before checking. No flaky timing hacks.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="architecture">
+    <div class="uj-container">
+      <h2>Architecture</h2>
+      <div class="arch-stack">
+        <div class="arch-layer user">
+          <span class="arch-label">Your Tests</span>
+          <span class="arch-desc">vitest + uncle-jesse-test</span>
+        </div>
+        <div class="arch-arrow">↓</div>
+        <div class="arch-layer test">
+          <span class="arch-label">uncle-jesse-test</span>
+          <span class="arch-desc">focusPath, assertions, vitest plugin, replay</span>
+        </div>
+        <div class="arch-arrow">↓</div>
+        <div class="arch-layer core">
+          <span class="arch-label">uncle-jesse-core</span>
+          <span class="arch-desc">TVDevice, LiveElement, BasePage, selectors</span>
+        </div>
+        <div class="arch-arrow">↓</div>
+        <div class="arch-layer adapter">
+          <span class="arch-label">uncle-jesse-roku</span>
+          <span class="arch-desc">RokuAdapter wrapping @danecodes/roku-ecp</span>
+        </div>
+        <div class="arch-arrow">↓</div>
+        <div class="arch-layer device">
+          <span class="arch-label">Roku ECP</span>
+          <span class="arch-desc">HTTP API on port 8060</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="packages">
+    <div class="uj-container">
+      <h2>Packages</h2>
+      <table>
+        <thead>
+          <tr><th>Package</th><th>Description</th></tr>
+        </thead>
+        <tbody>
+          {packages.map((p) => (
+            <tr>
+              <td><code>{p.name}</code></td>
+              <td>{p.desc}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="cta-bottom">
+    <div class="uj-container">
+      <h2>Stop pressing buttons manually.</h2>
+      <p>Get started in five minutes. Roku first, with other platforms planned.</p>
+      <div class="hero-cta">
+        <a href="/uncle-jesse/docs" class="btn btn-primary">Read the Docs</a>
+        <a href="/uncle-jesse/migration" class="btn btn-ghost">Migrate from Appium</a>
+      </div>
+    </div>
+  </section>
+</UncleJesseLayout>
+
+<style>
+  .hero {
+    padding: 100px 0 80px;
+    background: linear-gradient(180deg, var(--uj-bg) 0%, var(--uj-surface) 100%);
+  }
+
+  .hero-badge {
+    display: inline-block;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--uj-green);
+    border: 1px solid var(--uj-green);
+    padding: 4px 12px;
+    border-radius: 20px;
+    margin-bottom: 24px;
+  }
+
+  .hero h1 { margin-bottom: 20px; }
+
+  .hero-sub {
+    font-size: 1.25rem;
+    font-weight: 300;
+    color: var(--uj-text-muted);
+    max-width: 600px;
+    margin-bottom: 32px;
+    line-height: 1.5;
+  }
+
+  .hero-install {
+    margin-bottom: 32px;
+  }
+
+  .install-cmd {
+    display: inline-block;
+    font-family: var(--uj-mono);
+    font-size: 0.8125rem;
+    background: var(--uj-surface);
+    border: 1px solid var(--uj-border);
+    padding: 12px 20px;
+    border-radius: 8px;
+    color: var(--uj-green);
+    word-break: break-all;
+  }
+
+  .hero-cta { display: flex; gap: 12px; flex-wrap: wrap; }
+
+  .btn {
+    display: inline-block;
+    font-family: var(--uj-font);
+    font-weight: 500;
+    font-size: 0.9375rem;
+    padding: 10px 24px;
+    border-radius: 8px;
+    transition: all 0.15s;
+  }
+
+  .btn-primary {
+    background: var(--uj-accent);
+    color: var(--uj-bg);
+  }
+
+  .btn-primary:hover { background: var(--uj-accent-bright); color: var(--uj-bg); }
+
+  .btn-ghost {
+    background: transparent;
+    color: var(--uj-text);
+    border: 1px solid var(--uj-border);
+  }
+
+  .btn-ghost:hover { border-color: var(--uj-text-muted); color: #fff; }
+
+  /* Code demo sections */
+  .code-demo, .focus-path-section { padding: 80px 0; }
+  .focus-path-section { background: var(--uj-surface); }
+
+  .demo-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 48px;
+    align-items: center;
+  }
+
+  .demo-grid.reverse .demo-code { order: -1; }
+
+  .demo-text h2 { margin-bottom: 16px; }
+  .demo-text p { color: var(--uj-text-muted); margin-bottom: 12px; }
+
+  /* Features */
+  .features { padding: 80px 0; }
+  .features h2 { margin-bottom: 40px; }
+
+  .feature-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+  }
+
+  .feature-card {
+    background: var(--uj-surface);
+    border: 1px solid var(--uj-border);
+    border-radius: 8px;
+    padding: 24px;
+    transition: border-color 0.15s;
+  }
+
+  .feature-card:hover { border-color: var(--uj-accent); }
+
+  .feature-icon { font-size: 1.5rem; display: block; margin-bottom: 12px; }
+  .feature-card h4 { margin-bottom: 8px; }
+  .feature-card p { font-size: 0.875rem; color: var(--uj-text-muted); margin: 0; }
+
+  /* Architecture */
+  .architecture { padding: 80px 0; background: var(--uj-surface); }
+  .architecture h2 { margin-bottom: 40px; text-align: center; }
+
+  .arch-stack {
+    max-width: 500px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .arch-layer {
+    width: 100%;
+    padding: 16px 24px;
+    border: 1px solid var(--uj-border);
+    border-radius: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: var(--uj-surface-raised);
+  }
+
+  .arch-layer.user { border-color: var(--uj-purple); }
+  .arch-layer.test { border-color: var(--uj-accent); }
+  .arch-layer.core { border-color: var(--uj-accent); }
+  .arch-layer.adapter { border-color: var(--uj-green); }
+  .arch-layer.device { border-color: var(--uj-orange); }
+
+  .arch-label { font-family: var(--uj-mono); font-weight: 500; font-size: 0.875rem; color: #fff; }
+  .arch-desc { font-size: 0.75rem; color: var(--uj-text-muted); text-align: right; }
+  .arch-arrow { color: var(--uj-text-muted); font-size: 1.25rem; padding: 4px 0; }
+
+  /* Packages */
+  .packages { padding: 80px 0; }
+  .packages h2 { margin-bottom: 24px; }
+
+  /* Bottom CTA */
+  .cta-bottom {
+    padding: 80px 0;
+    background: var(--uj-surface);
+    text-align: center;
+  }
+
+  .cta-bottom h2 { margin-bottom: 12px; }
+  .cta-bottom p { color: var(--uj-text-muted); margin-bottom: 32px; }
+  .cta-bottom .hero-cta { justify-content: center; }
+
+  @media (max-width: 768px) {
+    .demo-grid { grid-template-columns: 1fr; gap: 32px; }
+    .demo-grid.reverse .demo-code { order: 0; }
+    .feature-grid { grid-template-columns: 1fr; }
+    .hero { padding: 60px 0; }
+  }
+</style>

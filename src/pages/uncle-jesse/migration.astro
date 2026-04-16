@@ -1,0 +1,270 @@
+---
+import UncleJesseLayout from '../../layouts/UncleJesseLayout.astro';
+---
+
+<UncleJesseLayout title="Migration Guide" description="Migrate from Appium/WebdriverIO to Uncle Jesse. Step-by-step guide for Roku E2E test suites.">
+  <div class="docs-layout">
+    <aside class="docs-sidebar">
+      <nav>
+        <h4>Migration</h4>
+        <a href="#overview">Overview</a>
+        <a href="#why-migrate">Why Migrate</a>
+        <a href="#comparison">Side-by-Side</a>
+        <a href="#selectors">Selectors</a>
+        <a href="#page-objects">Page Objects</a>
+        <a href="#assertions">Assertions</a>
+        <a href="#navigation">Navigation</a>
+        <a href="#setup-teardown">Setup & Teardown</a>
+        <a href="#ci">CI Integration</a>
+        <a href="#checklist">Checklist</a>
+      </nav>
+    </aside>
+
+    <div class="docs-content">
+      <h1>Migrating from Appium / WebdriverIO</h1>
+      <p class="docs-intro">A step-by-step guide for moving your Roku E2E test suite from Appium to Uncle Jesse. Most patterns have direct equivalents.</p>
+
+      <section id="overview">
+        <h2>Overview</h2>
+        <p>If you're running Roku tests with Appium + WebdriverIO today, you're dealing with:</p>
+        <ul>
+          <li>Java runtime dependency (Appium server)</li>
+          <li>Selenium Grid or local server management</li>
+          <li>WebDriver protocol overhead over HTTP</li>
+          <li>Appium Roku driver quirks and version pinning</li>
+          <li>Flaky element waits through the WebDriver abstraction</li>
+        </ul>
+        <p>Uncle Jesse replaces all of that with direct HTTP calls to ECP on port 8060. Same test patterns, no middleware.</p>
+      </section>
+
+      <section id="why-migrate">
+        <h2>Why Migrate</h2>
+        <table>
+          <thead><tr><th>Factor</th><th>Appium/WebdriverIO</th><th>Uncle Jesse</th></tr></thead>
+          <tbody>
+            <tr><td>Runtime dependency</td><td>Java + Appium server</td><td>Node.js only</td></tr>
+            <tr><td>Protocol</td><td>WebDriver → Appium → ECP</td><td>Direct HTTP to ECP</td></tr>
+            <tr><td>Setup time</td><td>15-30 min (Java, Appium, driver)</td><td>npm install (30 seconds)</td></tr>
+            <tr><td>Element queries</td><td>XPath or custom locators</td><td>CSS-like selectors</td></tr>
+            <tr><td>Focus testing</td><td>Manual key-count scripting</td><td>focusPath with visual replay</td></tr>
+            <tr><td>Page objects</td><td>WebdriverIO pattern</td><td>Compatible BasePage/BaseComponent</td></tr>
+            <tr><td>Parallel devices</td><td>Selenium Grid config</td><td>Built-in DevicePool</td></tr>
+            <tr><td>Debug output</td><td>Appium logs</td><td>BrightScript console capture + replay HTML</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section id="comparison">
+        <h2>Side-by-Side Comparison</h2>
+
+        <h3>Finding an element</h3>
+        <p><strong>Before (WebdriverIO):</strong></p>
+        <pre><code>{`const element = await $('~screenTitle');
+// or XPath
+const el = await $('//Label[@name="screenTitle"]');`}</code></pre>
+        <p><strong>After (Uncle Jesse):</strong></p>
+        <pre><code>{`const element = await tv.$('Label#screenTitle');
+// or just by name
+const el = await tv.$('#screenTitle');`}</code></pre>
+
+        <h3>Pressing remote keys</h3>
+        <p><strong>Before:</strong></p>
+        <pre><code>{`await driver.pressKeyCode('Right');
+await driver.pressKeyCode('Right');
+await driver.pressKeyCode('Right');
+await driver.pressKeyCode('Select');`}</code></pre>
+        <p><strong>After:</strong></p>
+        <pre><code>{`await tv.press('right', { times: 3 });
+await tv.select();`}</code></pre>
+
+        <h3>Waiting for an element</h3>
+        <p><strong>Before:</strong></p>
+        <pre><code>{`await $('~loadingSpinner').waitForDisplayed({ reverse: true, timeout: 10000 });
+await $('~contentGrid').waitForExist({ timeout: 10000 });`}</code></pre>
+        <p><strong>After:</strong></p>
+        <pre><code>{`const spinner = tv.$('LoadingSpinner');
+await spinner.toNotBeDisplayed({ timeout: 10000 });
+const grid = tv.$('ContentGrid');
+await grid.toExist({ timeout: 10000 });`}</code></pre>
+      </section>
+
+      <section id="selectors">
+        <h2>Selector Migration</h2>
+        <table>
+          <thead><tr><th>WebdriverIO</th><th>Uncle Jesse</th></tr></thead>
+          <tbody>
+            <tr><td><code>$('~elementName')</code></td><td><code>tv.$('#elementName')</code></td></tr>
+            <tr><td><code>$('//Label[@name="title"]')</code></td><td><code>tv.$('Label#title')</code></td></tr>
+            <tr><td><code>$('//HomeScreen//RowList')</code></td><td><code>tv.$('HomeScreen RowList')</code></td></tr>
+            <tr><td><code>$('//LayoutGroup/Label')</code></td><td><code>tv.$('LayoutGroup > Label')</code></td></tr>
+            <tr><td><code>$$('//NavTab')</code></td><td><code>tv.$$('NavTab')</code></td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section id="page-objects">
+        <h2>Page Object Migration</h2>
+        <p>Uncle Jesse's <code>BasePage</code> and <code>BaseComponent</code> are designed to be a near drop-in replacement for WebdriverIO page objects.</p>
+        <p><strong>Before:</strong></p>
+        <pre><code>{`class HomePage extends Page {
+  get grid() { return $('~contentGrid'); }
+  get title() { return $('~screenTitle'); }
+
+  async open() {
+    await driver.pressKeyCode('Home');
+    await this.grid.waitForExist();
+  }
+}`}</code></pre>
+        <p><strong>After:</strong></p>
+        <pre><code>{`class HomePage extends BasePage {
+  get root() { return this.$('HomeScreen'); }
+  get grid() { return this.$('HomeScreen ContentGrid'); }
+  get title() { return this.$('#screenTitle'); }
+
+  async waitForLoaded() {
+    await this.root.toBeDisplayed();
+    await this.grid.toExist();
+  }
+}`}</code></pre>
+        <p>Key differences: selectors scope to the page's subtree, and elements are <code>LiveElement</code> instances with built-in assertions.</p>
+      </section>
+
+      <section id="assertions">
+        <h2>Assertion Migration</h2>
+        <table>
+          <thead><tr><th>WebdriverIO</th><th>Uncle Jesse</th></tr></thead>
+          <tbody>
+            <tr><td><code>expect(el).toBeDisplayed()</code></td><td><code>await el.toBeDisplayed()</code></td></tr>
+            <tr><td><code>expect(el).toHaveText('Home')</code></td><td><code>await el.toHaveText('Home')</code></td></tr>
+            <tr><td><code>expect(el).toHaveAttr('focused', 'true')</code></td><td><code>await el.toBeFocused()</code></td></tr>
+            <tr><td><code>expect(els).toBeElementsArrayOfSize(3)</code></td><td><code>await els.toHaveLength(3)</code></td></tr>
+          </tbody>
+        </table>
+        <p>Uncle Jesse assertions poll automatically — no need for explicit <code>waitUntil</code> wrappers.</p>
+      </section>
+
+      <section id="navigation">
+        <h2>Navigation Testing</h2>
+        <p><strong>Before:</strong> Manual sequences of key presses with sleep calls between them.</p>
+        <pre><code>{`await driver.pressKeyCode('Down');
+await browser.pause(500);
+await driver.pressKeyCode('Down');
+await browser.pause(500);
+const focused = await $('[focused="true"]');
+expect(await focused.getAttribute('name')).toBe('settings');`}</code></pre>
+        <p><strong>After:</strong> focusPath handles timing, collects failures, and optionally records visual replays.</p>
+        <pre><code>{`const result = await focusPath(tv)
+  .press('down').expectFocus('#browseTab')
+  .press('down').expectFocus('#settingsTab')
+  .verify();
+
+expect(result.passed).toBe(true);`}</code></pre>
+      </section>
+
+      <section id="setup-teardown">
+        <h2>Setup & Teardown</h2>
+        <p><strong>Before:</strong></p>
+        <pre><code>{`// wdio.conf.js — pages of Appium capabilities, server config,
+// driver timeouts, implicit waits...`}</code></pre>
+        <p><strong>After:</strong></p>
+        <pre><code>{`import { RokuAdapter } from '@danecodes/uncle-jesse-roku';
+
+let tv: RokuAdapter;
+
+beforeEach(async () => {
+  tv = new RokuAdapter({ name: 'test', ip: '192.168.1.100' });
+  await tv.connect();
+  await tv.home();
+  await tv.launchApp('dev');
+});
+
+afterEach(async () => {
+  await tv.disconnect();
+});`}</code></pre>
+      </section>
+
+      <section id="ci">
+        <h2>CI Integration</h2>
+        <p>Replace your Appium server setup in CI with a simple npm script:</p>
+        <pre><code>{`# Before: start Appium server, configure capabilities, manage driver versions
+# After:
+npx uncle-jesse test --reporter junit`}</code></pre>
+        <p>Uncle Jesse's CLI outputs JUnit XML and CTRF JSON for any CI system. Exit code 1 on failure.</p>
+      </section>
+
+      <section id="checklist">
+        <h2>Migration Checklist</h2>
+        <ul class="checklist">
+          <li>Install Uncle Jesse packages</li>
+          <li>Convert selectors from XPath / <code>~name</code> to CSS-like syntax</li>
+          <li>Convert page objects to <code>BasePage</code> / <code>BaseComponent</code></li>
+          <li>Replace <code>driver.pressKeyCode</code> with <code>tv.press()</code></li>
+          <li>Replace <code>browser.pause()</code> with <code>waitForStable()</code> or element assertions</li>
+          <li>Replace navigation test scripts with <code>focusPath</code></li>
+          <li>Update CI pipeline (remove Appium/Java, add <code>npx uncle-jesse test</code>)</li>
+          <li>Remove Appium, WebdriverIO, and Java dependencies</li>
+          <li>Run tests against a real device to verify</li>
+        </ul>
+      </section>
+    </div>
+  </div>
+</UncleJesseLayout>
+
+<style>
+  .docs-layout {
+    display: grid;
+    grid-template-columns: 220px 1fr;
+    gap: 48px;
+    max-width: var(--uj-max-width);
+    margin: 0 auto;
+    padding: 48px 24px 80px;
+  }
+
+  .docs-sidebar {
+    position: sticky;
+    top: 80px;
+    align-self: start;
+    max-height: calc(100vh - 100px);
+    overflow-y: auto;
+  }
+
+  .docs-sidebar h4 {
+    font-size: 0.6875rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--uj-text-muted);
+    margin: 24px 0 8px;
+    font-weight: 600;
+  }
+
+  .docs-sidebar h4:first-child { margin-top: 0; }
+
+  .docs-sidebar a {
+    display: block;
+    font-size: 0.8125rem;
+    color: var(--uj-text-muted);
+    padding: 4px 0;
+  }
+
+  .docs-sidebar a:hover { color: #fff; }
+
+  .docs-content { min-width: 0; }
+  .docs-content h1 { margin-bottom: 8px; }
+  .docs-intro { color: var(--uj-text-muted); font-size: 1.125rem; margin-bottom: 48px; }
+
+  .docs-content section { margin-bottom: 56px; }
+  .docs-content section h2 { margin-bottom: 16px; padding-top: 24px; }
+  .docs-content section h3 { margin-top: 24px; margin-bottom: 12px; color: var(--uj-accent); }
+  .docs-content p { color: var(--uj-text-muted); margin-bottom: 12px; }
+  .docs-content ul { padding-left: 20px; color: var(--uj-text-muted); margin-bottom: 16px; }
+  .docs-content li { margin-bottom: 6px; }
+
+  .checklist { list-style: none; padding-left: 0; }
+  .checklist li { padding: 8px 0 8px 28px; position: relative; border-bottom: 1px solid var(--uj-border); }
+  .checklist li::before { content: '☐'; position: absolute; left: 0; color: var(--uj-accent); }
+
+  @media (max-width: 768px) {
+    .docs-layout { grid-template-columns: 1fr; gap: 24px; }
+    .docs-sidebar { position: static; max-height: none; }
+  }
+</style>
