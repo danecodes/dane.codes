@@ -1,0 +1,530 @@
+---
+import ToolLayout from '../../layouts/ToolLayout.astro';
+
+const features = [
+  { icon: '🌳', title: 'Inspect the UI', desc: 'Query the full SceneGraph node tree to see what\'s on screen. CSS-like selectors: <code>HomePage HomeHeroCarousel</code>, <code>AppButton#play_button</code>.' },
+  { icon: '🎮', title: 'Send Input', desc: 'Remote control keys, D-pad navigation, text entry. Press, hold, repeat — all through natural language.' },
+  { icon: '📸', title: 'Screenshots', desc: 'Capture the current screen and save to disk. Visual proof for QA, bug reports, or CI artifacts.' },
+  { icon: '🧪', title: 'Smoke Tests', desc: 'Launch, verify UI renders, check playback starts. Full pass/fail report with step-by-step detail.' },
+  { icon: '📋', title: 'Cert Preflight', desc: 'Run Roku certification failure checklist — back nav, Home exit, relaunch, error scan — before you submit.' },
+  { icon: '📊', title: 'Performance Sampling', desc: 'Sample CPU via chanperf during playback. Get high watermark and pass/fail against your threshold.' },
+  { icon: '🔍', title: 'Console Logs', desc: 'Read BrightScript debug output — errors, print statements, crashes. Watch for patterns during a time window.' },
+  { icon: '📦', title: 'Sideload & Watch', desc: 'Deploy a .zip to the device and monitor console for errors. CI-ready pass/fail report.' },
+  { icon: '🤖', title: 'Agent Efficiency', desc: 'Token-efficient tools: <code>focused_element</code>, <code>screen_name</code>, <code>console_watch</code>. Get just what the agent needs.' },
+];
+
+const tools = {
+  device: [
+    { name: 'roku_ui_tree', desc: 'Get the full SceneGraph UI tree' },
+    { name: 'roku_find_element', desc: 'Find elements by CSS-like selector' },
+    { name: 'roku_press_key', desc: 'Send remote control key press' },
+    { name: 'roku_type_text', desc: 'Type text into keyboard inputs' },
+    { name: 'roku_screenshot', desc: 'Take a screenshot, save to disk' },
+    { name: 'roku_launch', desc: 'Launch a channel with deep link params' },
+    { name: 'roku_deep_link', desc: 'Deep link into content by ID' },
+    { name: 'roku_close_app', desc: 'Close the running app' },
+    { name: 'roku_sideload', desc: 'Deploy a .zip package to the device' },
+    { name: 'roku_device_info', desc: 'Get device model, software, network' },
+    { name: 'roku_active_app', desc: 'Get the currently running app' },
+    { name: 'roku_media_player', desc: 'Get playback state and position' },
+    { name: 'roku_installed_apps', desc: 'List all installed channels' },
+    { name: 'roku_console_log', desc: 'Read BrightScript debug console' },
+    { name: 'roku_console_command', desc: 'Send debug commands (bt, var, etc.)' },
+    { name: 'roku_volume', desc: 'Volume up, down, or mute' },
+    { name: 'roku_input', desc: 'Send custom input params to the app' },
+  ],
+  test: [
+    { name: 'roku_wait_for', desc: 'Poll until a selector appears on screen' },
+    { name: 'roku_assert_element', desc: 'Assert element exists, focused, or has attribute' },
+    { name: 'roku_sideload_and_watch', desc: 'Sideload + watch console for errors' },
+    { name: 'roku_smoke_test', desc: 'Launch, verify UI, verify playback' },
+  ],
+  agent: [
+    { name: 'roku_focused_element', desc: 'Currently focused element (token-efficient)' },
+    { name: 'roku_screen_name', desc: 'Infer current screen from SceneGraph root' },
+    { name: 'roku_console_watch', desc: 'Monitor console for pattern match' },
+  ],
+  shiftLeft: [
+    { name: 'roku_cert_preflight', desc: 'Roku cert failure checklist' },
+    { name: 'roku_chanperf_sample', desc: 'CPU sampling via chanperf' },
+  ],
+};
+
+const navLinks = [
+  { label: 'Docs', href: '/roku-mcp/docs' },
+  { label: 'GitHub', href: 'https://github.com/danecodes/roku-mcp' },
+  { label: 'npm', href: 'https://www.npmjs.com/package/@danecodes/roku-mcp' },
+];
+---
+
+<ToolLayout
+  toolName="roku-mcp"
+  logoText="MCP"
+  accentColor="#d29922"
+  githubUrl="https://github.com/danecodes/roku-mcp"
+  npmUrl="https://www.npmjs.com/package/@danecodes/roku-mcp"
+  navLinks={navLinks}
+  title="MCP Server for Roku"
+  description="roku-mcp — MCP server and CLI that lets AI agents interact with Roku devices. Inspect SceneGraph UI, send remote input, take screenshots, run smoke tests."
+>
+  <section class="hero">
+    <div class="uj-container">
+      <div class="hero-badge">Open Source</div>
+      <h1>AI agents meet<br />your Roku.</h1>
+      <p class="hero-sub">MCP server and CLI that lets AI agents interact with Roku devices. Inspect SceneGraph UI, send remote input, take screenshots, run smoke tests, cert preflight — all through natural language.</p>
+      <div class="hero-install">
+        <code class="install-cmd">npx -y --package @danecodes/roku-mcp roku-mcp-server</code>
+      </div>
+      <div class="hero-cta">
+        <a href="/roku-mcp/docs" class="btn btn-primary">Get Started</a>
+        <a href="https://github.com/danecodes/roku-mcp" class="btn btn-ghost" target="_blank" rel="noopener">GitHub</a>
+        <a href="https://www.npmjs.com/package/@danecodes/roku-mcp" class="btn btn-ghost" target="_blank" rel="noopener">npm</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="compat">
+    <div class="uj-container">
+      <h3 class="compat-title">Works with your agent</h3>
+      <div class="compat-grid">
+        <div class="compat-item">
+          <span class="compat-label">Claude Code</span>
+          <span class="compat-transport">stdio</span>
+        </div>
+        <div class="compat-item">
+          <span class="compat-label">Cursor</span>
+          <span class="compat-transport">stdio</span>
+        </div>
+        <div class="compat-item">
+          <span class="compat-label">Windsurf</span>
+          <span class="compat-transport">stdio</span>
+        </div>
+        <div class="compat-item">
+          <span class="compat-label">GitHub Copilot</span>
+          <span class="compat-transport">HTTP</span>
+        </div>
+        <div class="compat-item">
+          <span class="compat-label">OpenAI Codex</span>
+          <span class="compat-transport">stdio</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="code-demo">
+    <div class="uj-container">
+      <div class="demo-grid">
+        <div class="demo-text">
+          <h2>Talk to your Roku<br />through your agent.</h2>
+          <p>Your coding agent uses MCP tools to navigate, inspect, and screenshot the device. No new API to learn — just describe what you want in natural language.</p>
+        </div>
+        <div class="demo-code">
+          <pre><code>{`You: Go to the browse screen, select the Action
+     genre, and take a screenshot for me.
+
+Agent: I'll navigate to the Browse screen.
+
+  → roku_press_key(key: "Back")
+  → roku_press_key(key: "Left")
+  → roku_ui_tree(depth: 4)
+
+Agent: I can see the nav menu. Let me find
+       Browse and select it.
+
+  → roku_press_key(key: "Down", times: 2)
+  → roku_press_key(key: "Select")
+  → roku_press_key(key: "Down", times: 4)
+  → roku_press_key(key: "Select")
+
+Agent: We're on the Action genre list now.
+
+  → roku_screenshot(save_path: "./action.png")`}</code></pre>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="features">
+    <div class="uj-container">
+      <h2>Everything your agent needs to work with a Roku.</h2>
+      <div class="feature-grid">
+        {features.map((f) => (
+          <div class="feature-card">
+            <span class="feature-icon">{f.icon}</span>
+            <h4>{f.title}</h4>
+            <p set:html={f.desc} />
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="smoke-test-section">
+    <div class="uj-container">
+      <div class="demo-grid reverse">
+        <div class="demo-code">
+          <pre><code>{`You: Sideload the build and run a smoke test.
+     Deep link to content "GG5H5XQ7R" (episode)
+     and verify playback starts.
+
+Agent: Sideloading and watching console...
+
+  → roku_sideload_and_watch(
+      zip_path: "./target/build.zip",
+      duration: 30000)
+
+  { "passed": true,
+    "message": "PASS: Install Success —
+      no errors in 30s of console output" }
+
+Agent: Clean install. Running smoke test.
+
+  → roku_smoke_test(
+      content_id: "GG5H5XQ7R",
+      media_type: "episode",
+      playback_timeout: 30000)
+
+  { "passed": true,
+    "steps": [
+      { "name": "launch", "passed": true },
+      { "name": "ui_visible", "passed": true,
+        "elapsed_ms": 2340 },
+      { "name": "playback", "passed": true,
+        "elapsed_ms": 8710 }
+    ] }`}</code></pre>
+        </div>
+        <div class="demo-text">
+          <h2>Smoke tests in one prompt.</h2>
+          <p>Sideload a dev build, watch the console for crashes, then run a full smoke test with playback verification. Your agent reports back with pass/fail and timing.</p>
+          <p>All test tools return structured JSON — CI-friendly exit codes included for the CLI.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="tools-section">
+    <div class="uj-container">
+      <h2>26 tools across 4 categories.</h2>
+
+      <h3 class="tool-category">Device Control</h3>
+      <div class="tools-grid">
+        {tools.device.map((t) => (
+          <div class="tool-card">
+            <code>{t.name}</code>
+            <p>{t.desc}</p>
+          </div>
+        ))}
+      </div>
+
+      <h3 class="tool-category">Test Runner</h3>
+      <div class="tools-grid">
+        {tools.test.map((t) => (
+          <div class="tool-card">
+            <code>{t.name}</code>
+            <p>{t.desc}</p>
+          </div>
+        ))}
+      </div>
+
+      <h3 class="tool-category">Agent Efficiency</h3>
+      <div class="tools-grid">
+        {tools.agent.map((t) => (
+          <div class="tool-card">
+            <code>{t.name}</code>
+            <p>{t.desc}</p>
+          </div>
+        ))}
+      </div>
+
+      <h3 class="tool-category">Shift Left Quality Gates</h3>
+      <div class="tools-grid">
+        {tools.shiftLeft.map((t) => (
+          <div class="tool-card">
+            <code>{t.name}</code>
+            <p>{t.desc}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="architecture">
+    <div class="uj-container">
+      <h2>How it works</h2>
+      <p class="arch-intro">Roku devices expose an HTTP API called ECP (External Control Protocol) on port 8060. roku-mcp calls ECP endpoints directly — no WebDriver, no Appium, no Selenium, no Java.</p>
+      <div class="arch-stack">
+        <div class="arch-layer agent-layer">
+          <span class="arch-label">Your AI Agent</span>
+          <span class="arch-desc">Claude Code, Cursor, Copilot, Codex</span>
+        </div>
+        <div class="arch-arrow">↓ MCP (stdio or HTTP)</div>
+        <div class="arch-layer mcp-layer">
+          <span class="arch-label">roku-mcp</span>
+          <span class="arch-desc">26 tools + server instructions</span>
+        </div>
+        <div class="arch-arrow">↓ HTTP :8060</div>
+        <div class="arch-layer device-layer">
+          <span class="arch-label">Roku ECP</span>
+          <span class="arch-desc">External Control Protocol</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="cta-bottom">
+    <div class="uj-container">
+      <h2>Let your agent see the screen.</h2>
+      <p>Set up in two minutes. Works with any Roku device in developer mode.</p>
+      <div class="hero-cta">
+        <a href="/roku-mcp/docs" class="btn btn-primary">Read the Docs</a>
+        <a href="https://github.com/danecodes/roku-mcp" class="btn btn-ghost" target="_blank" rel="noopener">GitHub</a>
+      </div>
+    </div>
+  </section>
+</ToolLayout>
+
+<style>
+  .hero {
+    padding: 100px 0 80px;
+    background: linear-gradient(180deg, var(--uj-bg) 0%, var(--uj-surface) 100%);
+  }
+
+  .hero-badge {
+    display: inline-block;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--uj-accent);
+    border: 1px solid var(--uj-accent);
+    padding: 4px 12px;
+    border-radius: 20px;
+    margin-bottom: 24px;
+  }
+
+  .hero h1 { margin-bottom: 20px; }
+
+  .hero-sub {
+    font-size: 1.25rem;
+    font-weight: 300;
+    color: var(--uj-text-muted);
+    max-width: 640px;
+    margin-bottom: 32px;
+    line-height: 1.5;
+  }
+
+  .hero-install { margin-bottom: 32px; }
+
+  .install-cmd {
+    display: inline-block;
+    font-family: var(--uj-mono);
+    font-size: 0.8125rem;
+    background: var(--uj-surface);
+    border: 1px solid var(--uj-border);
+    padding: 12px 20px;
+    border-radius: 8px;
+    color: var(--uj-accent);
+    word-break: break-all;
+  }
+
+  .hero-cta { display: flex; gap: 12px; flex-wrap: wrap; }
+
+  .btn {
+    display: inline-block;
+    font-family: var(--uj-font);
+    font-weight: 500;
+    font-size: 0.9375rem;
+    padding: 10px 24px;
+    border-radius: 8px;
+    transition: all 0.15s;
+  }
+
+  .btn-primary {
+    background: var(--uj-accent);
+    color: var(--uj-bg);
+  }
+
+  .btn-primary:hover { background: var(--uj-accent-bright); color: var(--uj-bg); }
+
+  .btn-ghost {
+    background: transparent;
+    color: var(--uj-text);
+    border: 1px solid var(--uj-border);
+  }
+
+  .btn-ghost:hover { border-color: var(--uj-text-muted); color: #fff; }
+
+  /* Compatibility bar */
+  .compat {
+    padding: 40px 0;
+    border-bottom: 1px solid var(--uj-border);
+    background: var(--uj-surface);
+  }
+
+  .compat-title {
+    text-align: center;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--uj-text-muted);
+    margin-bottom: 20px;
+    font-weight: 600;
+  }
+
+  .compat-grid {
+    display: flex;
+    justify-content: center;
+    gap: 32px;
+    flex-wrap: wrap;
+  }
+
+  .compat-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .compat-label {
+    font-weight: 500;
+    font-size: 0.9375rem;
+    color: #fff;
+  }
+
+  .compat-transport {
+    font-family: var(--uj-mono);
+    font-size: 0.6875rem;
+    color: var(--uj-accent);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  /* Code demo sections */
+  .code-demo, .smoke-test-section { padding: 80px 0; }
+  .smoke-test-section { background: var(--uj-surface); }
+
+  .demo-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 48px;
+    align-items: center;
+  }
+
+  .demo-grid.reverse .demo-code { order: -1; }
+
+  .demo-text h2 { margin-bottom: 16px; }
+  .demo-text p { color: var(--uj-text-muted); margin-bottom: 12px; }
+
+  /* Features */
+  .features { padding: 80px 0; }
+  .features h2 { margin-bottom: 40px; }
+
+  .feature-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+  }
+
+  .feature-card {
+    background: var(--uj-surface);
+    border: 1px solid var(--uj-border);
+    border-radius: 8px;
+    padding: 24px;
+    transition: border-color 0.15s;
+  }
+
+  .feature-card:hover { border-color: var(--uj-accent); }
+
+  .feature-icon { font-size: 1.5rem; display: block; margin-bottom: 12px; }
+  .feature-card h4 { margin-bottom: 8px; }
+  .feature-card p { font-size: 0.875rem; color: var(--uj-text-muted); margin: 0; }
+
+  /* Tools section */
+  .tools-section { padding: 80px 0; background: var(--uj-surface); }
+  .tools-section h2 { margin-bottom: 32px; }
+
+  .tool-category {
+    margin-top: 32px;
+    margin-bottom: 16px;
+    color: var(--uj-accent);
+    font-size: 1rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .tools-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 12px;
+    margin-bottom: 8px;
+  }
+
+  .tool-card {
+    background: var(--uj-surface-raised);
+    border: 1px solid var(--uj-border);
+    border-radius: 6px;
+    padding: 12px 16px;
+    transition: border-color 0.15s;
+  }
+
+  .tool-card:hover { border-color: var(--uj-accent); }
+  .tool-card code { font-size: 0.8125rem; color: #fff; }
+  .tool-card p { font-size: 0.8125rem; color: var(--uj-text-muted); margin: 4px 0 0; }
+
+  /* Architecture */
+  .architecture { padding: 80px 0; }
+  .architecture h2 { margin-bottom: 16px; text-align: center; }
+
+  .arch-intro {
+    text-align: center;
+    color: var(--uj-text-muted);
+    max-width: 600px;
+    margin: 0 auto 40px;
+  }
+
+  .arch-stack {
+    max-width: 500px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .arch-layer {
+    width: 100%;
+    padding: 16px 24px;
+    border: 1px solid var(--uj-border);
+    border-radius: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: var(--uj-surface-raised);
+  }
+
+  .arch-layer.agent-layer { border-color: var(--uj-purple); }
+  .arch-layer.mcp-layer { border-color: var(--uj-accent); }
+  .arch-layer.device-layer { border-color: var(--uj-green); }
+
+  .arch-label { font-family: var(--uj-mono); font-weight: 500; font-size: 0.875rem; color: #fff; }
+  .arch-desc { font-size: 0.75rem; color: var(--uj-text-muted); text-align: right; }
+  .arch-arrow { color: var(--uj-text-muted); font-size: 0.8125rem; padding: 8px 0; font-family: var(--uj-mono); }
+
+  /* Bottom CTA */
+  .cta-bottom {
+    padding: 80px 0;
+    background: var(--uj-surface);
+    text-align: center;
+  }
+
+  .cta-bottom h2 { margin-bottom: 12px; }
+  .cta-bottom p { color: var(--uj-text-muted); margin-bottom: 32px; }
+  .cta-bottom .hero-cta { justify-content: center; }
+
+  @media (max-width: 768px) {
+    .demo-grid { grid-template-columns: 1fr; gap: 32px; }
+    .demo-grid.reverse .demo-code { order: 0; }
+    .feature-grid { grid-template-columns: 1fr; }
+    .tools-grid { grid-template-columns: 1fr; }
+    .hero { padding: 60px 0; }
+  }
+</style>

@@ -1,0 +1,360 @@
+---
+import ToolLayout from '../../layouts/ToolLayout.astro';
+---
+
+<ToolLayout
+  title="Documentation"
+  description="roku-ecp documentation — discovery, remote control, app lifecycle, device queries, UI tree selectors, sideloading, screenshots, debug console, and console parsing."
+  toolName="roku-ecp"
+  logoText="ECP"
+  accentColor="#3fb950"
+  accentColorBright="#56d364"
+  basePath="/roku-ecp"
+  navLinks={[
+    { label: 'Docs', href: '/roku-ecp/docs' },
+  ]}
+  githubUrl="https://github.com/danecodes/roku-ecp"
+  npmUrl="https://www.npmjs.com/package/@danecodes/roku-ecp"
+>
+  <div class="docs-layout">
+    <aside class="docs-sidebar">
+      <nav>
+        <h4>Getting Started</h4>
+        <a href="#install">Installation</a>
+        <a href="#quick-start">Quick Start</a>
+
+        <h4>Connection</h4>
+        <a href="#discover">Discovery (SSDP)</a>
+        <a href="#client">EcpClient</a>
+
+        <h4>Input</h4>
+        <a href="#key-input">Key Input</a>
+
+        <h4>Apps</h4>
+        <a href="#app-lifecycle">App Lifecycle</a>
+
+        <h4>Queries</h4>
+        <a href="#queries">Device Queries</a>
+
+        <h4>Dev Tools</h4>
+        <a href="#sideload-screenshot">Sideload & Screenshot</a>
+        <a href="#debug-console">Debug Console</a>
+
+        <h4>UI Tree</h4>
+        <a href="#ui-tree">Parsing & Querying</a>
+        <a href="#selectors">Selector Syntax</a>
+        <a href="#ui-node">UiNode Interface</a>
+
+        <h4>Utilities</h4>
+        <a href="#console-parser">Console Parser</a>
+        <a href="#requirements">Requirements</a>
+      </nav>
+    </aside>
+
+    <div class="docs-content">
+      <h1>Documentation</h1>
+      <p class="docs-intro">Complete API reference for <code>@danecodes/roku-ecp</code> -- the TypeScript client for the Roku External Control Protocol.</p>
+
+      <section id="install">
+        <h2>Installation</h2>
+        <pre><code>npm install @danecodes/roku-ecp</code></pre>
+        <p>Requires Node.js 18+ and a Roku device in developer mode on your network.</p>
+      </section>
+
+      <section id="quick-start">
+        <h2>Quick Start</h2>
+        <pre><code>{`import { EcpClient, Key, parseUiXml, findElement, findFocused } from '@danecodes/roku-ecp';
+
+// Connect by IP
+const roku = new EcpClient('192.168.0.30');
+
+// Or discover on the network
+const roku = await EcpClient.discover();
+const allDevices = await EcpClient.discoverAll();
+
+// Send remote control input
+await roku.press(Key.Down, { times: 3 });
+await roku.press(Key.Select);
+
+// Type into a search field
+await roku.type('one piece');
+
+// Inspect the SceneGraph UI tree
+const xml = await roku.queryAppUi();
+const tree = parseUiXml(xml);
+const button = findElement(tree, 'AppButton#play_button');
+console.log(button?.attrs.text); // "Play"
+
+// Check what's focused
+const focused = findFocused(tree);
+console.log(focused?.tag, focused?.attrs.name);
+
+// Query device state
+const info = await roku.queryDeviceInfo();
+const app = await roku.queryActiveApp();
+const player = await roku.queryMediaPlayer();
+const apps = await roku.queryInstalledApps();`}</code></pre>
+      </section>
+
+      <section id="discover">
+        <h2>Discovery (SSDP)</h2>
+        <p>Find Roku devices on the local network via SSDP M-SEARCH. No hardcoded IPs required.</p>
+        <pre><code>{`// Find the first Roku on the network (5s default timeout)
+const roku = await EcpClient.discover();
+
+// Custom timeout
+const roku = await EcpClient.discover({ timeout: 10000 });
+
+// Find ALL Roku devices on the network
+const all = await EcpClient.discoverAll();
+console.log(all.map(d => d.ip)); // ['192.168.0.30', '192.168.0.42']`}</code></pre>
+      </section>
+
+      <section id="client">
+        <h2>EcpClient</h2>
+        <p>Create a client by passing the device IP and optional configuration.</p>
+        <pre><code>{`const roku = new EcpClient('192.168.0.30');
+
+// With options
+const roku = new EcpClient('192.168.0.30', {
+  port: 8060,           // ECP HTTP port (default: 8060)
+  devPassword: 'rokudev', // developer password for sideload/screenshot
+  timeout: 10000,        // request timeout in ms
+});`}</code></pre>
+        <table>
+          <thead><tr><th>Option</th><th>Default</th><th>Description</th></tr></thead>
+          <tbody>
+            <tr><td><code>port</code></td><td><code>8060</code></td><td>ECP HTTP port</td></tr>
+            <tr><td><code>devPassword</code></td><td><code>"rokudev"</code></td><td>Developer password for sideload/screenshot</td></tr>
+            <tr><td><code>timeout</code></td><td><code>10000</code></td><td>Request timeout in ms</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section id="key-input">
+        <h2>Key Input</h2>
+        <p>Send remote control key presses to the device.</p>
+        <pre><code>{`await roku.keypress(Key.Select);           // single press
+await roku.keydown(Key.Right);             // key down
+await roku.keyup(Key.Right);               // key up
+await roku.press(Key.Down, { times: 5, delay: 100 }); // repeated press
+await roku.type('search text', { delay: 50 });        // character-by-character`}</code></pre>
+        <h3>Available Keys</h3>
+        <p>All standard Roku keys are available on the <code>Key</code> object:</p>
+        <div class="key-grid">
+          <code>Home</code> <code>Back</code> <code>Select</code>
+          <code>Up</code> <code>Down</code> <code>Left</code> <code>Right</code>
+          <code>Play</code> <code>Rev</code> <code>Fwd</code>
+          <code>Info</code> <code>Search</code> <code>Enter</code> <code>Backspace</code>
+          <code>InstantReplay</code>
+          <code>VolumeUp</code> <code>VolumeDown</code> <code>VolumeMute</code>
+          <code>PowerOn</code> <code>PowerOff</code>
+          <code>InputHDMI1</code> <code>InputHDMI2</code> <code>InputHDMI3</code> <code>InputHDMI4</code>
+          <code>InputAV1</code> <code>InputTuner</code>
+        </div>
+      </section>
+
+      <section id="app-lifecycle">
+        <h2>App Lifecycle</h2>
+        <p>Launch, install, deep link, and manage apps on the device.</p>
+        <pre><code>{`await roku.launch('12345');                              // launch by channel ID
+await roku.launch('dev', { contentId: 'abc', mediaType: 'episode' }); // with params
+await roku.deepLink('dev', 'abc', 'episode');            // shorthand
+await roku.install('12345');                             // install from store
+await roku.input({ key: 'value' });                      // send input params
+await roku.closeApp();                                   // press Home`}</code></pre>
+      </section>
+
+      <section id="queries">
+        <h2>Device Queries</h2>
+        <p>Query device state, active app, installed apps, media player, and performance.</p>
+        <pre><code>{`const info = await roku.queryDeviceInfo();       // DeviceInfo
+const app = await roku.queryActiveApp();         // ActiveApp
+const apps = await roku.queryInstalledApps();    // InstalledApp[]
+const player = await roku.queryMediaPlayer();    // MediaPlayerState
+const xml = await roku.queryAppUi();             // raw XML string
+const perf = await roku.queryChanperf();         // ChanperfSample`}</code></pre>
+
+        <h3>DeviceInfo</h3>
+        <p>Returns model, firmware version, serial number, network info, display capabilities, and more. Parsed from the ECP <code>/query/device-info</code> endpoint.</p>
+
+        <h3>ActiveApp</h3>
+        <p>Returns the currently running app's ID, name, and version.</p>
+
+        <h3>MediaPlayerState</h3>
+        <p>Returns playback state, position, duration, buffering status, and stream info from <code>/query/media-player</code>.</p>
+      </section>
+
+      <section id="sideload-screenshot">
+        <h2>Sideload & Screenshot</h2>
+        <p>Deploy dev channel builds and capture screenshots. Requires developer mode enabled on the device.</p>
+        <pre><code>{`// Deploy a dev channel build
+await roku.sideload('./build.zip');
+
+// Capture a screenshot (returns Buffer)
+const png = await roku.takeScreenshot();`}</code></pre>
+        <p>Both operations use digest authentication with the configured <code>devPassword</code>.</p>
+      </section>
+
+      <section id="debug-console">
+        <h2>Debug Console (Port 8085)</h2>
+        <p>Read BrightScript console output and send debug commands via TCP on port 8085.</p>
+        <pre><code>{`// Read console output for 3 seconds, filtering for 'error'
+const output = await roku.readConsole({ duration: 3000, filter: 'error' });
+
+// Send a debug command (e.g., backtrace)
+const response = await roku.sendConsoleCommand('bt');`}</code></pre>
+      </section>
+
+      <section id="ui-tree">
+        <h2>UI Tree: Parsing & Querying</h2>
+        <p>Parse the SceneGraph XML response and query it with CSS-like selectors.</p>
+        <pre><code>{`import { parseUiXml, findElement, findElements, findFocused, formatTree } from '@danecodes/roku-ecp';
+
+const tree = parseUiXml(await roku.queryAppUi());
+
+// Find a single element
+findElement(tree, 'AppButton#play');                    // by tag#name
+findElement(tree, '#titleLabel');                        // by name only
+findElement(tree, 'HomePage HomeHeroCarousel');          // descendant
+findElement(tree, 'LayoutGroup > AppLabel');             // direct child
+findElement(tree, 'AppButton:nth-child(1)');             // nth-child
+findElement(tree, 'CollectionModule + CollectionModule'); // adjacent sibling
+
+// Find all matching elements
+findElements(tree, 'AppButton');
+
+// Find the currently focused node
+findFocused(tree);
+
+// Pretty-print the tree
+console.log(formatTree(tree, { maxDepth: 3 }));`}</code></pre>
+        <p><code>parseUiXml</code> is synchronous -- no async/await needed for parsing.</p>
+      </section>
+
+      <section id="selectors">
+        <h2>Selector Syntax</h2>
+        <table>
+          <thead><tr><th>Pattern</th><th>Example</th><th>Matches</th></tr></thead>
+          <tbody>
+            <tr><td>Tag name</td><td><code>AppButton</code></td><td>All elements with that tag</td></tr>
+            <tr><td>ID (name)</td><td><code>#play_button</code></td><td>Element with <code>name="play_button"</code></td></tr>
+            <tr><td>Tag + ID</td><td><code>AppButton#play</code></td><td>AppButton with that name</td></tr>
+            <tr><td>Descendant</td><td><code>HomePage Carousel</code></td><td>Carousel anywhere inside HomePage</td></tr>
+            <tr><td>Direct child</td><td><code>LayoutGroup > Label</code></td><td>Label that is a direct child</td></tr>
+            <tr><td>Attribute</td><td><code>[focused="true"]</code></td><td>Element with that attribute value</td></tr>
+            <tr><td>Tag + attr</td><td><code>Label[text="Home"]</code></td><td>Label with text="Home"</td></tr>
+            <tr><td>nth-child</td><td><code>NavTab:nth-child(2)</code></td><td>Second NavTab among siblings</td></tr>
+            <tr><td>Adjacent sibling</td><td><code>Module + Module</code></td><td>Module preceded by another Module</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section id="ui-node">
+        <h2>UiNode Interface</h2>
+        <p>The parsed tree is made up of <code>UiNode</code> objects:</p>
+        <pre><code>{`interface UiNode {
+  tag: string;                        // SceneGraph component name
+  name?: string;                      // name or id attribute
+  attrs: Record<string, string>;      // all XML attributes
+  children: UiNode[];
+  parent?: UiNode;
+}`}</code></pre>
+      </section>
+
+      <section id="console-parser">
+        <h2>Console Parser</h2>
+        <p>Scan BrightScript debug output for structured issues.</p>
+        <pre><code>{`import { parseConsoleForIssues } from '@danecodes/roku-ecp';
+
+const output = await roku.readConsole({ duration: 5000 });
+const { errors, crashes, exceptions } = parseConsoleForIssues(output);`}</code></pre>
+        <table>
+          <thead><tr><th>Category</th><th>Detected Patterns</th></tr></thead>
+          <tbody>
+            <tr><td><strong>errors</strong></td><td><code>BRIGHTSCRIPT: ERROR</code>, <code>Runtime Error</code></td></tr>
+            <tr><td><strong>crashes</strong></td><td><code>Backtrace</code>, <code>-- crash</code>, <code>BRIGHTSCRIPT STOP</code></td></tr>
+            <tr><td><strong>exceptions</strong></td><td><code>STOP in file</code>, <code>PAUSE in file</code></td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section id="requirements">
+        <h2>Requirements</h2>
+        <ul>
+          <li>Node.js 18+</li>
+          <li>Roku device in developer mode on the same network</li>
+          <li>No native dependencies -- pure TypeScript/JavaScript</li>
+        </ul>
+      </section>
+    </div>
+  </div>
+</ToolLayout>
+
+<style>
+  .docs-layout {
+    display: grid;
+    grid-template-columns: 240px 1fr;
+    gap: 48px;
+    max-width: var(--uj-max-width);
+    margin: 0 auto;
+    padding: 48px 24px 80px;
+  }
+
+  .docs-sidebar {
+    position: sticky;
+    top: 80px;
+    align-self: start;
+    max-height: calc(100vh - 100px);
+    overflow-y: auto;
+  }
+
+  .docs-sidebar h4 {
+    font-size: 0.6875rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--uj-text-muted);
+    margin: 24px 0 8px;
+    font-weight: 600;
+  }
+
+  .docs-sidebar h4:first-child { margin-top: 0; }
+
+  .docs-sidebar a {
+    display: block;
+    font-size: 0.8125rem;
+    color: var(--uj-text-muted);
+    padding: 4px 0;
+    transition: color 0.15s;
+  }
+
+  .docs-sidebar a:hover { color: #fff; }
+
+  .docs-content { min-width: 0; }
+
+  .docs-content h1 { margin-bottom: 8px; }
+  .docs-intro { color: var(--uj-text-muted); font-size: 1.125rem; margin-bottom: 48px; }
+
+  .docs-content section { margin-bottom: 56px; }
+  .docs-content section h2 { margin-bottom: 16px; padding-top: 24px; }
+  .docs-content section h3 { margin-top: 24px; margin-bottom: 12px; color: var(--uj-accent); }
+  .docs-content p { color: var(--uj-text-muted); margin-bottom: 12px; }
+  .docs-content ul { padding-left: 20px; color: var(--uj-text-muted); margin-bottom: 16px; }
+  .docs-content li { margin-bottom: 6px; }
+
+  .key-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 16px 0;
+  }
+
+  .key-grid code {
+    font-size: 0.75rem;
+  }
+
+  @media (max-width: 768px) {
+    .docs-layout { grid-template-columns: 1fr; gap: 24px; }
+    .docs-sidebar { position: static; max-height: none; }
+  }
+</style>

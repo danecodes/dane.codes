@@ -1,8 +1,22 @@
 ---
-import UncleJesseLayout from '../../layouts/UncleJesseLayout.astro';
+import ToolLayout from '../../layouts/ToolLayout.astro';
 ---
 
-<UncleJesseLayout title="Documentation" description="Uncle Jesse documentation — setup, API reference, selectors, page objects, focusPath, visual replay, multi-device testing, and CI integration.">
+<ToolLayout
+  title="Documentation"
+  description="Uncle Jesse documentation — setup, API reference, selectors, page objects, focusPath, visual replay, multi-device testing, and CI integration."
+  toolName="Uncle Jesse"
+  logoText="UJ"
+  accentColor="#58a6ff"
+  accentColorBright="#79c0ff"
+  basePath="/uncle-jesse"
+  navLinks={[
+    { label: 'Docs', href: '/uncle-jesse/docs' },
+    { label: 'Migration', href: '/uncle-jesse/migration' },
+  ]}
+  githubUrl="https://github.com/danecodes/uncle-jesse"
+  npmUrl="https://www.npmjs.com/package/@danecodes/uncle-jesse-core"
+>
   <div class="docs-layout">
     <aside class="docs-sidebar">
       <nav>
@@ -345,7 +359,7 @@ npx uncle-jesse sideload ./build.zip --ip 192.168.1.100`}</code></pre>
       </section>
     </div>
   </div>
-</UncleJesseLayout>
+</ToolLayout>
 
 <style>
   .docs-layout {

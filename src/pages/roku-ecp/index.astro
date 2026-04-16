@@ -1,0 +1,352 @@
+---
+import ToolLayout from '../../layouts/ToolLayout.astro';
+
+const features = [
+  { icon: '🔍', title: 'SSDP Discovery', desc: 'Find Roku devices on your network automatically. No hardcoded IPs needed.' },
+  { icon: '🎮', title: 'Remote Control', desc: 'Send key presses, repeated inputs, and character-by-character typing over HTTP.' },
+  { icon: '📱', title: 'App Lifecycle', desc: 'Launch, install, deep link, send input params, and close apps programmatically.' },
+  { icon: '📊', title: 'Device Queries', desc: 'Query device info, active app, installed apps, media player state, and channel performance.' },
+  { icon: '🌳', title: 'UI Tree Inspection', desc: 'Parse SceneGraph XML and query with CSS-like selectors. <code>Tag#name</code>, descendant, child, nth-child, siblings.' },
+  { icon: '📸', title: 'Screenshots', desc: 'Capture PNG screenshots from developer mode devices with digest auth.' },
+  { icon: '📦', title: 'Sideloading', desc: 'Deploy dev channel builds over HTTP. No manual upload needed.' },
+  { icon: '🪵', title: 'Debug Console', desc: 'Read BrightScript console output on port 8085. Send commands like <code>bt</code> for backtraces.' },
+  { icon: '🐛', title: 'Console Parser', desc: 'Scan debug output for errors, crashes, exceptions, and backtraces as structured data.' },
+];
+
+const apiSections = [
+  { name: 'discover()', desc: 'Find Roku devices via SSDP M-SEARCH' },
+  { name: 'new EcpClient(ip)', desc: 'Connect by IP with configurable port, password, timeout' },
+  { name: 'keypress / press / type', desc: 'Remote control input with repeat and delay' },
+  { name: 'launch / deepLink / install', desc: 'App lifecycle management' },
+  { name: 'queryDeviceInfo()', desc: 'Device model, firmware, serial, network info' },
+  { name: 'queryActiveApp()', desc: 'Currently running app' },
+  { name: 'queryAppUi()', desc: 'Raw SceneGraph XML tree' },
+  { name: 'queryMediaPlayer()', desc: 'Playback state, position, duration, buffering' },
+  { name: 'sideload / takeScreenshot', desc: 'Dev channel deployment and screen capture' },
+  { name: 'readConsole / sendConsoleCommand', desc: 'BrightScript debug console (port 8085)' },
+  { name: 'parseUiXml / findElement', desc: 'CSS selector engine for SceneGraph nodes' },
+  { name: 'parseConsoleForIssues', desc: 'Structured error/crash/exception detection' },
+];
+---
+
+<ToolLayout
+  title="Roku ECP Client"
+  description="roku-ecp — Lightweight TypeScript client for the Roku External Control Protocol. No WebDriver, no Appium, no Selenium, just HTTP."
+  toolName="roku-ecp"
+  logoText="ECP"
+  accentColor="#3fb950"
+  accentColorBright="#56d364"
+  basePath="/roku-ecp"
+  navLinks={[
+    { label: 'Docs', href: '/roku-ecp/docs' },
+  ]}
+  githubUrl="https://github.com/danecodes/roku-ecp"
+  npmUrl="https://www.npmjs.com/package/@danecodes/roku-ecp"
+>
+  <section class="hero">
+    <div class="uj-container">
+      <div class="hero-badge">Open Source</div>
+      <h1>Roku ECP,<br />from TypeScript.</h1>
+      <p class="hero-sub">Lightweight TypeScript client for the Roku External Control Protocol.<br />No WebDriver. No Appium. No Selenium. No Java. Just HTTP to port 8060.</p>
+      <div class="hero-install">
+        <code class="install-cmd">npm install @danecodes/roku-ecp</code>
+      </div>
+      <div class="hero-cta">
+        <a href="/roku-ecp/docs" class="btn btn-primary">Read the Docs</a>
+        <a href="https://github.com/danecodes/roku-ecp" class="btn btn-ghost" target="_blank" rel="noopener">GitHub</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="code-demo">
+    <div class="uj-container">
+      <div class="demo-grid">
+        <div class="demo-text">
+          <h2>The whole Roku,<br />over HTTP.</h2>
+          <p>Discover devices, press remote keys, launch apps, inspect the UI tree, capture screenshots, read the debug console. One package, zero native dependencies.</p>
+          <p>Built as the foundation for <a href="/uncle-jesse">Uncle Jesse</a> and <a href="https://github.com/danecodes/roku-mcp">roku-mcp</a>.</p>
+        </div>
+        <div class="demo-code">
+          <pre><code>{`import { EcpClient, Key, parseUiXml,
+         findElement, findFocused } from '@danecodes/roku-ecp';
+
+// Discover or connect by IP
+const roku = await EcpClient.discover();
+// const roku = new EcpClient('192.168.0.30');
+
+// Remote control
+await roku.press(Key.Down, { times: 3 });
+await roku.press(Key.Select);
+await roku.type('one piece');
+
+// Inspect the UI tree with CSS selectors
+const xml = await roku.queryAppUi();
+const tree = parseUiXml(xml);
+const button = findElement(tree, 'AppButton#play_button');
+console.log(button?.attrs.text); // "Play"
+
+// Check what's focused
+const focused = findFocused(tree);
+console.log(focused?.tag, focused?.attrs.name);`}</code></pre>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="features">
+    <div class="uj-container">
+      <h2>Everything in the Roku ECP. Nothing else.</h2>
+      <div class="feature-grid">
+        {features.map((f) => (
+          <div class="feature-card">
+            <span class="feature-icon">{f.icon}</span>
+            <h4>{f.title}</h4>
+            <p set:html={f.desc} />
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="selectors-section">
+    <div class="uj-container">
+      <div class="demo-grid reverse">
+        <div class="demo-code">
+          <pre><code>{`import { parseUiXml, findElement, findElements,
+         findFocused, formatTree } from '@danecodes/roku-ecp';
+
+const tree = parseUiXml(await roku.queryAppUi());
+
+findElement(tree, 'AppButton#play');           // tag#name
+findElement(tree, '#titleLabel');              // by name
+findElement(tree, 'HomePage HomeHeroCarousel');// descendant
+findElement(tree, 'LayoutGroup > AppLabel');   // direct child
+findElement(tree, 'AppButton:nth-child(1)');   // nth-child
+findElement(tree, 'Module + Module');           // adjacent sibling
+
+findElements(tree, 'AppButton'); // all matches
+findFocused(tree);                // focused node
+
+console.log(formatTree(tree, { maxDepth: 3 }));`}</code></pre>
+        </div>
+        <div class="demo-text">
+          <h2>CSS selectors on SceneGraph.</h2>
+          <p>Query Roku's XML UI tree with familiar syntax. Tag names, IDs, descendants, direct children, attribute selectors, nth-child, adjacent siblings.</p>
+          <p>No XPath. No custom query language. If you know CSS selectors, you know this.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="api-overview">
+    <div class="uj-container">
+      <h2>API at a Glance</h2>
+      <table>
+        <thead>
+          <tr><th>Method</th><th>Description</th></tr>
+        </thead>
+        <tbody>
+          {apiSections.map((s) => (
+            <tr>
+              <td><code>{s.name}</code></td>
+              <td>{s.desc}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      <div class="table-cta">
+        <a href="/roku-ecp/docs" class="btn btn-ghost">Full API Reference</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="toolchain">
+    <div class="uj-container">
+      <h2>Part of the @danecodes Roku Toolchain</h2>
+      <div class="toolchain-grid">
+        <div class="toolchain-card current">
+          <h4>roku-ecp</h4>
+          <p>Low-level ECP client. The foundation layer.</p>
+        </div>
+        <div class="toolchain-card">
+          <a href="https://github.com/danecodes/roku-mcp">
+            <h4>roku-mcp</h4>
+            <p>MCP server for AI-assisted Roku development and debugging.</p>
+          </a>
+        </div>
+        <div class="toolchain-card">
+          <a href="/uncle-jesse">
+            <h4>Uncle Jesse</h4>
+            <p>E2E testing framework built on roku-ecp. CSS selectors, focusPath, visual replay.</p>
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="cta-bottom">
+    <div class="uj-container">
+      <h2>One install. Full control.</h2>
+      <p>Start talking to your Roku in five minutes.</p>
+      <div class="hero-cta">
+        <a href="/roku-ecp/docs" class="btn btn-primary">Read the Docs</a>
+        <a href="https://github.com/danecodes/roku-ecp" class="btn btn-ghost" target="_blank" rel="noopener">View on GitHub</a>
+      </div>
+    </div>
+  </section>
+</ToolLayout>
+
+<style>
+  .hero {
+    padding: 100px 0 80px;
+    background: linear-gradient(180deg, var(--uj-bg) 0%, var(--uj-surface) 100%);
+  }
+
+  .hero-badge {
+    display: inline-block;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--uj-accent);
+    border: 1px solid var(--uj-accent);
+    padding: 4px 12px;
+    border-radius: 20px;
+    margin-bottom: 24px;
+  }
+
+  .hero h1 { margin-bottom: 20px; }
+
+  .hero-sub {
+    font-size: 1.25rem;
+    font-weight: 300;
+    color: var(--uj-text-muted);
+    max-width: 600px;
+    margin-bottom: 32px;
+    line-height: 1.5;
+  }
+
+  .hero-install { margin-bottom: 32px; }
+
+  .install-cmd {
+    display: inline-block;
+    font-family: var(--uj-mono);
+    font-size: 0.8125rem;
+    background: var(--uj-surface);
+    border: 1px solid var(--uj-border);
+    padding: 12px 20px;
+    border-radius: 8px;
+    color: var(--uj-accent);
+    word-break: break-all;
+  }
+
+  .hero-cta { display: flex; gap: 12px; flex-wrap: wrap; }
+
+  .btn {
+    display: inline-block;
+    font-family: var(--uj-font);
+    font-weight: 500;
+    font-size: 0.9375rem;
+    padding: 10px 24px;
+    border-radius: 8px;
+    transition: all 0.15s;
+  }
+
+  .btn-primary { background: var(--uj-accent); color: var(--uj-bg); }
+  .btn-primary:hover { background: var(--uj-accent-bright); color: var(--uj-bg); }
+
+  .btn-ghost {
+    background: transparent;
+    color: var(--uj-text);
+    border: 1px solid var(--uj-border);
+  }
+
+  .btn-ghost:hover { border-color: var(--uj-text-muted); color: #fff; }
+
+  .code-demo, .selectors-section { padding: 80px 0; }
+  .selectors-section { background: var(--uj-surface); }
+
+  .demo-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 48px;
+    align-items: center;
+  }
+
+  .demo-grid.reverse .demo-code { order: -1; }
+
+  .demo-text h2 { margin-bottom: 16px; }
+  .demo-text p { color: var(--uj-text-muted); margin-bottom: 12px; }
+
+  .features { padding: 80px 0; }
+  .features h2 { margin-bottom: 40px; }
+
+  .feature-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+  }
+
+  .feature-card {
+    background: var(--uj-surface);
+    border: 1px solid var(--uj-border);
+    border-radius: 8px;
+    padding: 24px;
+    transition: border-color 0.15s;
+  }
+
+  .feature-card:hover { border-color: var(--uj-accent); }
+
+  .feature-icon { font-size: 1.5rem; display: block; margin-bottom: 12px; }
+  .feature-card h4 { margin-bottom: 8px; }
+  .feature-card p { font-size: 0.875rem; color: var(--uj-text-muted); margin: 0; }
+
+  .api-overview { padding: 80px 0; }
+  .api-overview h2 { margin-bottom: 24px; }
+
+  .table-cta { margin-top: 24px; }
+
+  .toolchain { padding: 80px 0; background: var(--uj-surface); }
+  .toolchain h2 { margin-bottom: 32px; text-align: center; }
+
+  .toolchain-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    max-width: 800px;
+    margin: 0 auto;
+  }
+
+  .toolchain-card {
+    background: var(--uj-surface-raised);
+    border: 1px solid var(--uj-border);
+    border-radius: 8px;
+    padding: 24px;
+    transition: border-color 0.15s;
+  }
+
+  .toolchain-card.current { border-color: var(--uj-accent); }
+  .toolchain-card:hover { border-color: var(--uj-accent); }
+
+  .toolchain-card h4 { margin-bottom: 8px; font-size: 1rem; }
+  .toolchain-card p { font-size: 0.8125rem; color: var(--uj-text-muted); margin: 0; }
+  .toolchain-card a { color: inherit; }
+  .toolchain-card a:hover { color: inherit; }
+
+  .cta-bottom {
+    padding: 80px 0;
+    text-align: center;
+  }
+
+  .cta-bottom h2 { margin-bottom: 12px; }
+  .cta-bottom p { color: var(--uj-text-muted); margin-bottom: 32px; }
+  .cta-bottom .hero-cta { justify-content: center; }
+
+  @media (max-width: 768px) {
+    .demo-grid { grid-template-columns: 1fr; gap: 32px; }
+    .demo-grid.reverse .demo-code { order: 0; }
+    .feature-grid { grid-template-columns: 1fr; }
+    .toolchain-grid { grid-template-columns: 1fr; }
+    .hero { padding: 60px 0; }
+  }
+</style>

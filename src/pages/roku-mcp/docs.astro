@@ -1,0 +1,437 @@
+---
+import ToolLayout from '../../layouts/ToolLayout.astro';
+
+const navLinks = [
+  { label: 'Docs', href: '/roku-mcp/docs' },
+  { label: 'GitHub', href: 'https://github.com/danecodes/roku-mcp' },
+  { label: 'npm', href: 'https://www.npmjs.com/package/@danecodes/roku-mcp' },
+];
+---
+
+<ToolLayout
+  toolName="roku-mcp"
+  logoText="MCP"
+  accentColor="#d29922"
+  githubUrl="https://github.com/danecodes/roku-mcp"
+  npmUrl="https://www.npmjs.com/package/@danecodes/roku-mcp"
+  navLinks={navLinks}
+  title="Documentation"
+  description="roku-mcp documentation — setup, configuration, tool reference, CLI usage, selectors, and integration with Claude Code, Cursor, Copilot, and Codex."
+>
+  <div class="docs-layout">
+    <aside class="docs-sidebar">
+      <nav>
+        <h4>Getting Started</h4>
+        <a href="#install">Installation</a>
+        <a href="#configuration">Configuration</a>
+        <a href="#claude-code">Claude Code / Cursor</a>
+        <a href="#copilot">GitHub Copilot</a>
+        <a href="#codex">OpenAI Codex</a>
+
+        <h4>Tool Reference</h4>
+        <a href="#device-control">Device Control</a>
+        <a href="#test-runner">Test Runner</a>
+        <a href="#agent-efficiency">Agent Efficiency</a>
+        <a href="#shift-left">Shift Left</a>
+
+        <h4>Selectors</h4>
+        <a href="#selectors">Selector Syntax</a>
+
+        <h4>CLI</h4>
+        <a href="#cli-ui">UI Commands</a>
+        <a href="#cli-input">Input Commands</a>
+        <a href="#cli-info">Info Commands</a>
+        <a href="#cli-test">Test Commands</a>
+
+        <h4>Advanced</h4>
+        <a href="#library">Library Usage</a>
+        <a href="#http-transport">HTTP Transport</a>
+        <a href="#app-context">App Context File</a>
+        <a href="#auto-approve">Auto-Approve</a>
+      </nav>
+    </aside>
+
+    <div class="docs-content">
+      <h1>Documentation</h1>
+      <p class="docs-intro">Everything you need to connect your AI agent to a Roku device with roku-mcp.</p>
+
+      <!-- Getting Started -->
+
+      <section id="install">
+        <h2>Installation</h2>
+        <p>No install required for MCP usage — <code>npx</code> handles it. For CLI or library use:</p>
+        <pre><code>npm install @danecodes/roku-mcp</code></pre>
+        <p>Requires Node.js 18+ and a Roku device in developer mode on your network.</p>
+      </section>
+
+      <section id="configuration">
+        <h2>Configuration</h2>
+        <p>Set your Roku device IP address:</p>
+        <table>
+          <thead><tr><th>Method</th><th>How</th></tr></thead>
+          <tbody>
+            <tr><td>MCP server</td><td>Set <code>ROKU_DEVICE_IP</code> env var in your MCP config</td></tr>
+            <tr><td>CLI</td><td>Use <code>--device &lt;ip&gt;</code> flag (defaults to <code>192.168.0.30</code>)</td></tr>
+            <tr><td>Screenshots</td><td>Set <code>ROKU_DEV_PASSWORD</code> if your password isn't <code>rokudev</code></td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section id="claude-code">
+        <h2>Claude Code / Cursor / Windsurf</h2>
+        <p>Add to <code>.mcp.json</code> (project root or <code>~/.claude/.mcp.json</code> for global):</p>
+        <pre><code>{`{
+  "mcpServers": {
+    "roku": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "--package", "@danecodes/roku-mcp", "roku-mcp-server"],
+      "env": {
+        "ROKU_DEVICE_IP": "192.168.0.30"
+      }
+    }
+  }
+}`}</code></pre>
+        <p>Replace <code>192.168.0.30</code> with your Roku's IP address. The server starts automatically when your agent needs a Roku tool.</p>
+      </section>
+
+      <section id="copilot">
+        <h2>GitHub Copilot (VS Code)</h2>
+        <p>Copilot requires the HTTP transport. Start the server in a terminal first:</p>
+        <pre><code>{`ROKU_DEVICE_IP=192.168.0.30 npx --package @danecodes/roku-mcp roku-mcp-http
+# roku-mcp HTTP server running at http://localhost:3141/mcp`}</code></pre>
+        <p>Then add to <code>.vscode/mcp.json</code>:</p>
+        <pre><code>{`{
+  "servers": {
+    "roku": {
+      "type": "http",
+      "url": "http://localhost:3141/mcp"
+    }
+  }
+}`}</code></pre>
+        <p>Custom port: set <code>ROKU_MCP_PORT=8888</code>.</p>
+      </section>
+
+      <section id="codex">
+        <h2>OpenAI Codex CLI</h2>
+        <p>Add to <code>~/.codex/config.toml</code> (global) or <code>.codex/config.toml</code> (project):</p>
+        <pre><code>{`[mcp_servers.roku]
+command = "npx"
+args = ["-y", "--package", "@danecodes/roku-mcp", "roku-mcp-server"]
+
+[mcp_servers.roku.env]
+ROKU_DEVICE_IP = "192.168.0.30"`}</code></pre>
+      </section>
+
+      <!-- Tool Reference -->
+
+      <section id="device-control">
+        <h2>Device Control Tools</h2>
+        <table>
+          <thead><tr><th>Tool</th><th>Description</th></tr></thead>
+          <tbody>
+            <tr><td><code>roku_ui_tree</code></td><td>Get the full SceneGraph UI tree — see what's on screen</td></tr>
+            <tr><td><code>roku_find_element</code></td><td>Find elements by CSS-like selector</td></tr>
+            <tr><td><code>roku_press_key</code></td><td>Send remote control key press (Select, Up, Down, Left, Right, Back, Home, etc.)</td></tr>
+            <tr><td><code>roku_type_text</code></td><td>Type text into keyboard inputs</td></tr>
+            <tr><td><code>roku_screenshot</code></td><td>Take a screenshot, optionally save to disk</td></tr>
+            <tr><td><code>roku_launch</code></td><td>Launch a channel with optional deep link params</td></tr>
+            <tr><td><code>roku_deep_link</code></td><td>Deep link directly into content by ID</td></tr>
+            <tr><td><code>roku_close_app</code></td><td>Close the running app (press Home)</td></tr>
+            <tr><td><code>roku_sideload</code></td><td>Deploy a .zip package to the device</td></tr>
+            <tr><td><code>roku_device_info</code></td><td>Get device model, software version, network info</td></tr>
+            <tr><td><code>roku_active_app</code></td><td>Get the currently running app</td></tr>
+            <tr><td><code>roku_media_player</code></td><td>Get playback state (position, duration, format)</td></tr>
+            <tr><td><code>roku_installed_apps</code></td><td>List all installed channels</td></tr>
+            <tr><td><code>roku_console_log</code></td><td>Read BrightScript debug console output (errors, print statements, crashes)</td></tr>
+            <tr><td><code>roku_console_command</code></td><td>Send debug commands (bt, var, cont, step, over, out)</td></tr>
+            <tr><td><code>roku_volume</code></td><td>Volume up, down, or mute</td></tr>
+            <tr><td><code>roku_input</code></td><td>Send custom input parameters to the running app</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section id="test-runner">
+        <h2>Test Runner Tools</h2>
+        <table>
+          <thead><tr><th>Tool</th><th>Description</th></tr></thead>
+          <tbody>
+            <tr><td><code>roku_wait_for</code></td><td>Poll until a selector appears on screen with configurable timeout — use after navigation</td></tr>
+            <tr><td><code>roku_assert_element</code></td><td>Assert an element exists, is focused, or has a specific attribute value — returns pass/fail JSON</td></tr>
+            <tr><td><code>roku_sideload_and_watch</code></td><td>Sideload a zip + watch console for errors/crashes — returns CI-ready pass/fail report</td></tr>
+            <tr><td><code>roku_smoke_test</code></td><td>Launch app, verify UI renders, optionally verify playback — full pass/fail with step detail</td></tr>
+          </tbody>
+        </table>
+
+        <h3>Smoke Test Example</h3>
+        <pre><code>{`→ roku_smoke_test(
+    content_id: "GG5H5XQ7R",
+    media_type: "episode",
+    ui_timeout: 15000,
+    playback_timeout: 30000
+  )
+
+  {
+    "passed": true,
+    "message": "PASS: App launched, UI rendered, and playback started",
+    "steps": [
+      { "name": "launch", "passed": true,
+        "message": "Deep linked to \\"GG5H5XQ7R\\" in channel dev" },
+      { "name": "ui_visible", "passed": true,
+        "message": "UI rendered after 2340ms", "elapsed_ms": 2340 },
+      { "name": "playback", "passed": true,
+        "message": "Player reached \\"play\\" after 8710ms", "elapsed_ms": 8710 }
+    ],
+    "player_state": {
+      "state": "play",
+      "position": "00:00:08",
+      "duration": "00:42:17"
+    }
+  }`}</code></pre>
+      </section>
+
+      <section id="agent-efficiency">
+        <h2>Agent Efficiency Tools</h2>
+        <p>Token-efficient alternatives to full tree scans. Use these when you only need one piece of information.</p>
+        <table>
+          <thead><tr><th>Tool</th><th>Description</th></tr></thead>
+          <tbody>
+            <tr><td><code>roku_focused_element</code></td><td>Return only the currently focused element — avoids a full tree scan</td></tr>
+            <tr><td><code>roku_screen_name</code></td><td>Infer the current screen name from the SceneGraph root component</td></tr>
+            <tr><td><code>roku_console_watch</code></td><td>Monitor console for a pattern match during a time window — pass/fail with matching lines</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section id="shift-left">
+        <h2>Shift Left Quality Gates</h2>
+        <table>
+          <thead><tr><th>Tool</th><th>Description</th></tr></thead>
+          <tbody>
+            <tr><td><code>roku_cert_preflight</code></td><td>Run Roku cert failure checklist (back nav, Home exit, relaunch, error scan)</td></tr>
+            <tr><td><code>roku_chanperf_sample</code></td><td>Sample CPU usage via chanperf for a configurable duration — high watermark + pass/fail</td></tr>
+          </tbody>
+        </table>
+
+        <h3>Cert Preflight</h3>
+        <p>Runs the common Roku certification failure checks automatically:</p>
+        <ul>
+          <li>Back button navigation from each screen</li>
+          <li>Home button exits cleanly</li>
+          <li>App relaunch after Home exit</li>
+          <li>Console error scan during the entire flow</li>
+        </ul>
+      </section>
+
+      <!-- Selectors -->
+
+      <section id="selectors">
+        <h2>Selector Syntax</h2>
+        <p>Find elements using CSS-like selectors against SceneGraph node names:</p>
+        <table>
+          <thead><tr><th>Selector</th><th>Example</th><th>Matches</th></tr></thead>
+          <tbody>
+            <tr><td>Tag name</td><td><code>HomePage</code></td><td>Node with tag <code>HomePage</code></td></tr>
+            <tr><td>ID</td><td><code>#titleLabel</code></td><td>Node with <code>name="titleLabel"</code></td></tr>
+            <tr><td>Tag + ID</td><td><code>AppButton#play_button</code></td><td><code>AppButton</code> with <code>name="play_button"</code></td></tr>
+            <tr><td>Descendant</td><td><code>HomePage HomeHeroCarousel</code></td><td><code>HomeHeroCarousel</code> anywhere inside <code>HomePage</code></td></tr>
+            <tr><td>Child</td><td><code>LayoutGroup &gt; AppLabel</code></td><td><code>AppLabel</code> direct child of <code>LayoutGroup</code></td></tr>
+            <tr><td>Attribute</td><td><code>[focused="true"]</code></td><td>Element with that attribute value</td></tr>
+            <tr><td>Tag + attr</td><td><code>AppButton[text="Play"]</code></td><td><code>AppButton</code> with <code>text="Play"</code></td></tr>
+            <tr><td>Adjacent sibling</td><td><code>Module + Module</code></td><td><code>Module</code> preceded by another</td></tr>
+            <tr><td>nth-child</td><td><code>NavTab:nth-child(2)</code></td><td>Second <code>NavTab</code> among siblings</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <!-- CLI -->
+
+      <section id="cli-ui">
+        <h2>CLI: UI Commands</h2>
+        <pre><code>{`# Full SceneGraph tree
+npx roku-mcp ui tree --device 192.168.0.30
+npx roku-mcp ui tree --depth 4
+npx roku-mcp ui tree --all-attrs
+
+# Find elements by selector
+npx roku-mcp ui find "HomePage HomeHeroCarousel"
+npx roku-mcp ui find "AppButton#play_button"
+npx roku-mcp ui find "AppLabel" --all-attrs
+
+# Raw XML source
+npx roku-mcp ui source`}</code></pre>
+      </section>
+
+      <section id="cli-input">
+        <h2>CLI: Input Commands</h2>
+        <pre><code>{`# Key presses
+npx roku-mcp press Select
+npx roku-mcp press Down --times 3 --delay 200
+npx roku-mcp press Back
+
+# Text entry
+npx roku-mcp type "search query"
+
+# Launch apps
+npx roku-mcp launch dev
+npx roku-mcp launch dev --params '{"contentId":"12345","mediaType":"episode"}'`}</code></pre>
+      </section>
+
+      <section id="cli-info">
+        <h2>CLI: Info Commands</h2>
+        <pre><code>{`npx roku-mcp info device    # Device model, software, network
+npx roku-mcp info app       # Currently running app
+npx roku-mcp info apps      # All installed channels
+npx roku-mcp info player    # Playback state`}</code></pre>
+      </section>
+
+      <section id="cli-test">
+        <h2>CLI: Test Commands</h2>
+        <p>All test commands exit with code 1 on failure, making them CI-friendly.</p>
+        <pre><code>{`# Sideload and watch for errors
+npx roku-dev test sideload-watch ./target/build.zip --duration 30000
+
+# Full smoke test with playback verification
+npx roku-dev test smoke --content-id GG5H5XQ7R --media-type episode
+
+# Run cert preflight checklist
+npx roku-dev test cert-preflight
+
+# Sample CPU during playback
+npx roku-dev test chanperf --duration 15000 --threshold 70`}</code></pre>
+      </section>
+
+      <!-- Advanced -->
+
+      <section id="library">
+        <h2>Library Usage</h2>
+        <p>Use roku-mcp as a TypeScript library for custom tooling:</p>
+        <pre><code>{`import { EcpClient, Key, parseUiXml, findElement } from 'roku-mcp';
+
+const roku = new EcpClient('192.168.0.30');
+
+// Send keys
+await roku.press(Key.Down, { times: 3 });
+await roku.press(Key.Select);
+
+// Inspect the UI
+const xml = await roku.queryAppUi();
+const tree = await parseUiXml(xml);
+const button = findElement(tree, 'AppButton#play_button');
+console.log(button?.attrs.focused); // "true"
+console.log(button?.attrs.text);    // "Play"
+
+// Query state
+const player = await roku.queryMediaPlayer();
+const app = await roku.queryActiveApp();`}</code></pre>
+      </section>
+
+      <section id="http-transport">
+        <h2>HTTP Transport</h2>
+        <p>For editors that don't support stdio (like VS Code with Copilot), use the HTTP transport:</p>
+        <pre><code>{`# Start the HTTP server
+ROKU_DEVICE_IP=192.168.0.30 npx --package @danecodes/roku-mcp roku-mcp-http
+
+# Custom port
+ROKU_MCP_PORT=8888 ROKU_DEVICE_IP=192.168.0.30 npx --package @danecodes/roku-mcp roku-mcp-http`}</code></pre>
+        <p>The server runs at <code>http://localhost:3141/mcp</code> by default and speaks the MCP HTTP transport protocol.</p>
+      </section>
+
+      <section id="app-context">
+        <h2>App Context File</h2>
+        <p>Provide your agent with app-specific context by creating a <code>roku-app.md</code> file and setting the <code>ROKU_APP_CONTEXT</code> environment variable:</p>
+        <pre><code>{`{
+  "mcpServers": {
+    "roku": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "--package", "@danecodes/roku-mcp", "roku-mcp-server"],
+      "env": {
+        "ROKU_DEVICE_IP": "192.168.0.30",
+        "ROKU_APP_CONTEXT": "./roku-app.md"
+      }
+    }
+  }
+}`}</code></pre>
+        <p>The context file can contain screen names, navigation patterns, content IDs, and any other information your agent needs to work effectively with your specific Roku app.</p>
+      </section>
+
+      <section id="auto-approve">
+        <h2>Auto-Approve Tool Calls</h2>
+        <p>To skip the approval prompt for every Roku tool call in Claude Code, add to <code>~/.claude/settings.json</code>:</p>
+        <pre><code>{`{
+  "permissions": {
+    "allow": ["mcp__roku"]
+  }
+}`}</code></pre>
+        <p>You can also use <code>roku-mcp init</code> to append a Roku playbook to your project's <code>CLAUDE.md</code>, giving the agent built-in knowledge of how to navigate your app.</p>
+      </section>
+    </div>
+  </div>
+</ToolLayout>
+
+<style>
+  .docs-layout {
+    display: grid;
+    grid-template-columns: 240px 1fr;
+    gap: 48px;
+    max-width: var(--uj-max-width);
+    margin: 0 auto;
+    padding: 48px 24px 80px;
+  }
+
+  .docs-sidebar {
+    position: sticky;
+    top: 80px;
+    align-self: start;
+    max-height: calc(100vh - 100px);
+    overflow-y: auto;
+  }
+
+  .docs-sidebar h4 {
+    font-size: 0.6875rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--uj-text-muted);
+    margin: 24px 0 8px;
+    font-weight: 600;
+  }
+
+  .docs-sidebar h4:first-child { margin-top: 0; }
+
+  .docs-sidebar a {
+    display: block;
+    font-size: 0.8125rem;
+    color: var(--uj-text-muted);
+    padding: 4px 0;
+    transition: color 0.15s;
+  }
+
+  .docs-sidebar a:hover { color: #fff; }
+
+  .docs-content { min-width: 0; }
+
+  .docs-content h1 { margin-bottom: 8px; }
+  .docs-intro { color: var(--uj-text-muted); font-size: 1.125rem; margin-bottom: 48px; }
+
+  .docs-content section { margin-bottom: 56px; }
+  .docs-content section h2 { margin-bottom: 16px; padding-top: 24px; }
+  .docs-content section h3 { margin: 24px 0 12px; color: var(--uj-accent); }
+  .docs-content p { color: var(--uj-text-muted); margin-bottom: 12px; }
+
+  .docs-content ul {
+    color: var(--uj-text-muted);
+    padding-left: 24px;
+    margin-bottom: 16px;
+  }
+
+  .docs-content li {
+    margin-bottom: 6px;
+    font-size: 0.9375rem;
+  }
+
+  @media (max-width: 768px) {
+    .docs-layout { grid-template-columns: 1fr; gap: 24px; }
+    .docs-sidebar { position: static; max-height: none; }
+  }
+</style>

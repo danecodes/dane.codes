@@ -1,13 +1,39 @@
 ---
+interface NavLink {
+  label: string;
+  href: string;
+}
+
 interface Props {
   title: string;
   description?: string;
+  toolName: string;
+  logoText: string;
+  accentColor: string;
+  accentColorBright?: string;
+  basePath: string;
+  navLinks: NavLink[];
+  githubUrl: string;
+  npmUrl: string;
 }
 
-const { title, description = 'Uncle Jesse — E2E testing framework for smart TVs. TypeScript, off-device, over HTTP. No Appium, no Selenium, no Java.' } = Astro.props;
+const {
+  title,
+  description,
+  toolName,
+  logoText,
+  accentColor,
+  accentColorBright,
+  basePath,
+  navLinks,
+  githubUrl,
+  npmUrl,
+} = Astro.props;
+
 const currentPath = Astro.url.pathname;
 const canonicalURL = new URL(currentPath, 'https://dane.codes').href;
-const siteTitle = `${title} — Uncle Jesse`;
+const siteTitle = `${title} — ${toolName}`;
+const metaDescription = description ?? `${toolName} — Roku developer tooling by danecodes.`;
 ---
 
 <html lang="en">
@@ -15,32 +41,32 @@ const siteTitle = `${title} — Uncle Jesse`;
     <meta charset="utf-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content={description} />
-    <meta name="keywords" content="Roku testing, E2E testing, smart TV testing, BrightScript, SceneGraph, TV automation, Roku developer tools, test framework, TypeScript, ECP, connected TV, OTT testing" />
+    <meta name="description" content={metaDescription} />
     <link rel="canonical" href={canonicalURL} />
     <meta property="og:type" content="website" />
     <meta property="og:url" content={canonicalURL} />
     <meta property="og:title" content={siteTitle} />
-    <meta property="og:description" content={description} />
-    <meta property="og:site_name" content="Uncle Jesse" />
+    <meta property="og:description" content={metaDescription} />
+    <meta property="og:site_name" content={toolName} />
     <meta name="twitter:card" content="summary" />
     <meta name="twitter:title" content={siteTitle} />
-    <meta name="twitter:description" content={description} />
+    <meta name="twitter:description" content={metaDescription} />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
     <title>{siteTitle}</title>
   </head>
   <body>
     <nav>
       <div class="uj-container nav-inner">
-        <a href="/uncle-jesse" class="nav-logo">
-          <span class="logo-icon">UJ</span>
-          <span>Uncle Jesse</span>
+        <a href={basePath} class="nav-logo">
+          <span class="logo-icon">{logoText}</span>
+          <span>{toolName}</span>
         </a>
         <div class="nav-links">
-          <a href="/uncle-jesse/docs" class:list={[{ active: currentPath.startsWith('/uncle-jesse/docs') }]}>Docs</a>
-          <a href="/uncle-jesse/migration" class:list={[{ active: currentPath.startsWith('/uncle-jesse/migration') }]}>Migration</a>
-          <a href="https://github.com/danecodes/uncle-jesse" target="_blank" rel="noopener">GitHub</a>
-          <a href="https://www.npmjs.com/package/@danecodes/uncle-jesse-core" target="_blank" rel="noopener">npm</a>
+          {navLinks.map((link) => (
+            <a href={link.href} class:list={[{ active: currentPath.startsWith(link.href) }]}>{link.label}</a>
+          ))}
+          <a href={githubUrl} target="_blank" rel="noopener">GitHub</a>
+          <a href={npmUrl} target="_blank" rel="noopener">npm</a>
         </div>
         <button class="nav-toggle" aria-label="Toggle menu">
           <span></span><span></span><span></span>
@@ -54,7 +80,7 @@ const siteTitle = `${title} — Uncle Jesse`;
 
     <footer>
       <div class="uj-container footer-inner">
-        <p>Uncle Jesse is open source under the MIT License.</p>
+        <p>{toolName} is open source under the MIT License.</p>
         <p class="footer-sub">Built by <a href="/">dane.codes</a> — part of the <a href="https://github.com/danecodes">@danecodes</a> Roku toolchain.</p>
       </div>
     </footer>
@@ -67,7 +93,7 @@ const siteTitle = `${title} — Uncle Jesse`;
   </body>
 </html>
 
-<style is:global>
+<style is:global define:vars={{ accentColor, accentColorBright: accentColorBright ?? accentColor }}>
   *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
   :root {
@@ -77,8 +103,8 @@ const siteTitle = `${title} — Uncle Jesse`;
     --uj-border: #252a33;
     --uj-text: #e1e4e8;
     --uj-text-muted: #8b949e;
-    --uj-accent: #58a6ff;
-    --uj-accent-bright: #79c0ff;
+    --uj-accent: var(--accentColor);
+    --uj-accent-bright: var(--accentColorBright);
     --uj-green: #3fb950;
     --uj-orange: #d29922;
     --uj-red: #f85149;

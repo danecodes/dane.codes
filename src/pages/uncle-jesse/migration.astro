@@ -1,8 +1,22 @@
 ---
-import UncleJesseLayout from '../../layouts/UncleJesseLayout.astro';
+import ToolLayout from '../../layouts/ToolLayout.astro';
 ---
 
-<UncleJesseLayout title="Migration Guide" description="Migrate from Appium/WebdriverIO to Uncle Jesse. Step-by-step guide for Roku E2E test suites.">
+<ToolLayout
+  title="Migration Guide"
+  description="Migrate from Appium/WebdriverIO to Uncle Jesse. Step-by-step guide for Roku E2E test suites."
+  toolName="Uncle Jesse"
+  logoText="UJ"
+  accentColor="#58a6ff"
+  accentColorBright="#79c0ff"
+  basePath="/uncle-jesse"
+  navLinks={[
+    { label: 'Docs', href: '/uncle-jesse/docs' },
+    { label: 'Migration', href: '/uncle-jesse/migration' },
+  ]}
+  githubUrl="https://github.com/danecodes/uncle-jesse"
+  npmUrl="https://www.npmjs.com/package/@danecodes/uncle-jesse-core"
+>
   <div class="docs-layout">
     <aside class="docs-sidebar">
       <nav>
@@ -208,7 +222,7 @@ npx uncle-jesse test --reporter junit`}</code></pre>
       </section>
     </div>
   </div>
-</UncleJesseLayout>
+</ToolLayout>
 
 <style>
   .docs-layout {

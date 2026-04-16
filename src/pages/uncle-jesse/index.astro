@@ -1,5 +1,5 @@
 ---
-import UncleJesseLayout from '../../layouts/UncleJesseLayout.astro';
+import ToolLayout from '../../layouts/ToolLayout.astro';
 
 const features = [
   { icon: '🎯', title: 'CSS-Like Selectors', desc: 'Query SceneGraph nodes with familiar syntax. <code>HomeScreen RowList</code>, <code>#title</code>, <code>Label[text="Home"]</code>.' },
@@ -21,7 +21,21 @@ const packages = [
 ];
 ---
 
-<UncleJesseLayout title="E2E Testing for Smart TVs">
+<ToolLayout
+  title="E2E Testing for Smart TVs"
+  description="Uncle Jesse — E2E testing framework for smart TVs. TypeScript, off-device, over HTTP. No Appium, no Selenium, no Java."
+  toolName="Uncle Jesse"
+  logoText="UJ"
+  accentColor="#58a6ff"
+  accentColorBright="#79c0ff"
+  basePath="/uncle-jesse"
+  navLinks={[
+    { label: 'Docs', href: '/uncle-jesse/docs' },
+    { label: 'Migration', href: '/uncle-jesse/migration' },
+  ]}
+  githubUrl="https://github.com/danecodes/uncle-jesse"
+  npmUrl="https://www.npmjs.com/package/@danecodes/uncle-jesse-core"
+>
   <section class="hero">
     <div class="uj-container">
       <div class="hero-badge">Open Source</div>
@@ -179,7 +193,7 @@ await saveReplay(recorded.replay, './results');`}</code></pre>
       </div>
     </div>
   </section>
-</UncleJesseLayout>
+</ToolLayout>
 
 <style>
   .hero {
