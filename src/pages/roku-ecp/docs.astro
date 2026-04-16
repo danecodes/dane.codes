@@ -29,6 +29,7 @@ import ToolLayout from '../../layouts/ToolLayout.astro';
 
         <h4>Input</h4>
         <a href="#key-input">Key Input</a>
+        <a href="#touch-input">Touch Input</a>
 
         <h4>Apps</h4>
         <a href="#app-lifecycle">App Lifecycle</a>
@@ -45,8 +46,17 @@ import ToolLayout from '../../layouts/ToolLayout.astro';
         <a href="#selectors">Selector Syntax</a>
         <a href="#ui-node">UiNode Interface</a>
 
-        <h4>Utilities</h4>
+        <h4>Wait Helpers</h4>
+        <a href="#wait-helpers">Wait Helpers</a>
+
+        <h4>Error Handling</h4>
+        <a href="#typed-errors">Typed Errors</a>
+
+        <h4>Log Parsing</h4>
         <a href="#console-parser">Console Parser</a>
+        <a href="#structured-logs">Structured Log Parsing</a>
+
+        <h4>Info</h4>
         <a href="#requirements">Requirements</a>
       </nav>
     </aside>
@@ -58,7 +68,7 @@ import ToolLayout from '../../layouts/ToolLayout.astro';
       <section id="install">
         <h2>Installation</h2>
         <pre><code>npm install @danecodes/roku-ecp</code></pre>
-        <p>Requires Node.js 18+ and a Roku device in developer mode on your network.</p>
+        <p>Requires Node.js 22+ and a Roku device in developer mode on your network.</p>
       </section>
 
       <section id="quick-start">
@@ -69,8 +79,8 @@ import ToolLayout from '../../layouts/ToolLayout.astro';
 const roku = new EcpClient('192.168.0.30');
 
 // Or discover on the network
-const roku = await EcpClient.discover();
-const allDevices = await EcpClient.discoverAll();
+// const roku = await EcpClient.discover();
+// const allDevices = await EcpClient.discoverAll();
 
 // Send remote control input
 await roku.press(Key.Down, { times: 3 });
@@ -127,6 +137,8 @@ const roku = new EcpClient('192.168.0.30', {
             <tr><td><code>port</code></td><td><code>8060</code></td><td>ECP HTTP port</td></tr>
             <tr><td><code>devPassword</code></td><td><code>"rokudev"</code></td><td>Developer password for sideload/screenshot</td></tr>
             <tr><td><code>timeout</code></td><td><code>10000</code></td><td>Request timeout in ms</td></tr>
+            <tr><td><code>keyCooldown</code></td><td><code>0</code></td><td>Minimum delay between key presses in ms</td></tr>
+            <tr><td><code>webCooldown</code></td><td><code>0</code></td><td>Minimum delay between web server requests in ms</td></tr>
           </tbody>
         </table>
       </section>
@@ -152,6 +164,16 @@ await roku.type('search text', { delay: 50 });        // character-by-character`
           <code>InputHDMI1</code> <code>InputHDMI2</code> <code>InputHDMI3</code> <code>InputHDMI4</code>
           <code>InputAV1</code> <code>InputTuner</code>
         </div>
+      </section>
+
+      <section id="touch-input">
+        <h2>Touch Input</h2>
+        <p>Send touch events to the device screen. Roku's coordinate origin is bottom-left.</p>
+        <pre><code>{`await roku.touch({ x: 100, y: 200 });                    // tap at coordinates
+await roku.touch({ x: 100, y: 200, op: 'down' });       // touch down
+await roku.touch({ x: 150, y: 250, op: 'move' });       // drag
+await roku.touch({ x: 150, y: 250, op: 'up' });         // release`}</code></pre>
+        <p>Operations: <code>'press'</code> (default), <code>'down'</code>, <code>'up'</code>, <code>'move'</code>.</p>
       </section>
 
       <section id="app-lifecycle">
@@ -188,8 +210,11 @@ const perf = await roku.queryChanperf();         // ChanperfSample`}</code></pre
       <section id="sideload-screenshot">
         <h2>Sideload & Screenshot</h2>
         <p>Deploy dev channel builds and capture screenshots. Requires developer mode enabled on the device.</p>
-        <pre><code>{`// Deploy a dev channel build
+        <pre><code>{`// Deploy a dev channel build (zip file)
 await roku.sideload('./build.zip');
+
+// Deploy from a directory
+await roku.sideload('./my-roku-app');
 
 // Capture a screenshot (returns Buffer)
 const png = await roku.takeScreenshot();`}</code></pre>
@@ -220,6 +245,10 @@ findElement(tree, 'HomePage HomeHeroCarousel');          // descendant
 findElement(tree, 'LayoutGroup > AppLabel');             // direct child
 findElement(tree, 'AppButton:nth-child(1)');             // nth-child
 findElement(tree, 'CollectionModule + CollectionModule'); // adjacent sibling
+findElement(tree, '[focused="true"]');                   // attribute value
+findElement(tree, '[visible]');                          // attribute existence
+findElement(tree, 'AppButton[focused="true"]');          // tag + attribute
+findElement(tree, 'AppButton#play[focused="true"]');     // tag + name + attribute
 
 // Find all matching elements
 findElements(tree, 'AppButton');
@@ -242,8 +271,10 @@ console.log(formatTree(tree, { maxDepth: 3 }));`}</code></pre>
             <tr><td>Tag + ID</td><td><code>AppButton#play</code></td><td>AppButton with that name</td></tr>
             <tr><td>Descendant</td><td><code>HomePage Carousel</code></td><td>Carousel anywhere inside HomePage</td></tr>
             <tr><td>Direct child</td><td><code>LayoutGroup > Label</code></td><td>Label that is a direct child</td></tr>
-            <tr><td>Attribute</td><td><code>[focused="true"]</code></td><td>Element with that attribute value</td></tr>
+            <tr><td>Attribute value</td><td><code>[focused="true"]</code></td><td>Element with that attribute value</td></tr>
+            <tr><td>Attribute existence</td><td><code>[visible]</code></td><td>Element with that attribute present</td></tr>
             <tr><td>Tag + attr</td><td><code>Label[text="Home"]</code></td><td>Label with text="Home"</td></tr>
+            <tr><td>Tag + name + attr</td><td><code>AppButton#play[focused="true"]</code></td><td>AppButton named "play" with focused=true</td></tr>
             <tr><td>nth-child</td><td><code>NavTab:nth-child(2)</code></td><td>Second NavTab among siblings</td></tr>
             <tr><td>Adjacent sibling</td><td><code>Module + Module</code></td><td>Module preceded by another Module</td></tr>
           </tbody>
@@ -279,10 +310,107 @@ const { errors, crashes, exceptions } = parseConsoleForIssues(output);`}</code><
         </table>
       </section>
 
+      <section id="wait-helpers">
+        <h2>Wait Helpers</h2>
+        <p>Poll the device until a condition is met, with configurable timeout and interval.</p>
+        <pre><code>{`import {
+  waitFor, waitForElement, waitForFocus,
+  waitForApp, waitForText, waitForStable,
+} from '@danecodes/roku-ecp';
+
+const getTree = async () => parseUiXml(await roku.queryAppUi());
+
+// Wait for an element to appear
+const el = await waitForElement(getTree, '#loginBtn');
+
+// Wait for a specific element to gain focus
+await waitForFocus(getTree, 'AppButton#play');
+
+// Wait for any element to be focused (no selector)
+const focused = await waitForFocus(getTree);
+
+// Wait for an app to become active
+await waitForApp(roku, '12345');
+
+// Wait for text content to appear
+await waitForText(getTree, '#title', 'Now Playing');
+
+// Wait for UI to stabilize after animation
+await roku.keypress(Key.Down);
+await waitForStable(getTree, { interval: 150, timeout: 3000 });
+
+// Generic: poll any custom condition
+const state = await waitFor(async () => {
+  const p = await roku.queryMediaPlayer();
+  return p.state === 'play' ? p : undefined;
+}, { timeout: 5000, label: 'waitForPlayback' });`}</code></pre>
+        <table>
+          <thead><tr><th>Option</th><th>Default</th><th>Description</th></tr></thead>
+          <tbody>
+            <tr><td><code>timeout</code></td><td><code>10000</code></td><td>Max wait in ms (<code>waitForStable</code> defaults to <code>3000</code>)</td></tr>
+            <tr><td><code>interval</code></td><td><code>200</code></td><td>Poll interval in ms (<code>waitForStable</code> defaults to <code>150</code>)</td></tr>
+          </tbody>
+        </table>
+        <p>Transient <code>EcpTimeoutError</code> and <code>EcpHttpError</code> during polling are caught and retried until the deadline. Non-transient errors throw immediately.</p>
+      </section>
+
+      <section id="typed-errors">
+        <h2>Typed Errors</h2>
+        <p>All errors are typed for clean catch handling.</p>
+        <pre><code>{`import {
+  EcpHttpError, EcpTimeoutError, EcpAuthError,
+  EcpSideloadError, EcpScreenshotError,
+} from '@danecodes/roku-ecp';
+
+try {
+  await roku.queryDeviceInfo();
+} catch (err) {
+  if (err instanceof EcpTimeoutError)  // device unreachable
+  if (err instanceof EcpHttpError)     // non-ok HTTP status
+  if (err instanceof EcpAuthError)     // digest auth failure
+}`}</code></pre>
+        <table>
+          <thead><tr><th>Error</th><th>When</th></tr></thead>
+          <tbody>
+            <tr><td><code>EcpTimeoutError</code></td><td>Device unreachable or request timed out</td></tr>
+            <tr><td><code>EcpHttpError</code></td><td>Non-OK HTTP status (includes method, path, status)</td></tr>
+            <tr><td><code>EcpAuthError</code></td><td>Digest authentication failure</td></tr>
+            <tr><td><code>EcpSideloadError</code></td><td>Sideload operation failed</td></tr>
+            <tr><td><code>EcpScreenshotError</code></td><td>Screenshot capture failed</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section id="structured-logs">
+        <h2>Structured Log Parsing</h2>
+        <p>Powered by <a href="https://github.com/danecodes/roku-log">@danecodes/roku-log</a>. Full structured parsing with file/line/function extraction, real-time streaming, and aggregation.</p>
+        <pre><code>{`import { LogParser, LogStream, LogSession, LogFormatter } from '@danecodes/roku-ecp';
+
+// Parse raw text into structured entries
+const parser = new LogParser();
+const entries = parser.parse(output);  // LogEntry[] with type, source, message
+
+// Stream logs in real time
+const stream = new LogStream('192.168.0.30');
+stream.on('error', (err) => console.log(err.errorClass, err.source));
+stream.on('crash', (bt) => console.log(bt.frames));
+stream.on('beacon', (b) => console.log(b.event, b.duration));
+await stream.connect();
+
+// Aggregate and analyze
+const session = new LogSession();
+session.addAll(entries);
+console.log(session.summary());  // { errorCount, crashCount, ... }
+
+// Color-coded terminal output
+const fmt = new LogFormatter({ color: true });
+entries.forEach(e => console.log(fmt.format(e)));`}</code></pre>
+      </section>
+
       <section id="requirements">
         <h2>Requirements</h2>
         <ul>
-          <li>Node.js 18+</li>
+          <li>Node.js 22+</li>
           <li>Roku device in developer mode on the same network</li>
           <li>No native dependencies -- pure TypeScript/JavaScript</li>
         </ul>

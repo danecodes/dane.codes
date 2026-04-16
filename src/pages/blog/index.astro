@@ -24,9 +24,6 @@ const posts = (await getCollection('blog')).sort(
         {posts.map((post) => (
           <a href={`/blog/${post.id}`} class="post-item">
             <div class="post-meta">
-              <time datetime={new Date(post.data.date).toISOString()}>
-                {new Date(post.data.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
-              </time>
               {post.data.tags && (
                 <div class="post-tags">
                   {post.data.tags.map((tag: string) => (

@@ -3,20 +3,22 @@ import ToolLayout from '../../layouts/ToolLayout.astro';
 
 const features = [
   { icon: '🔍', title: 'SSDP Discovery', desc: 'Find Roku devices on your network automatically. No hardcoded IPs needed.' },
-  { icon: '🎮', title: 'Remote Control', desc: 'Send key presses, repeated inputs, and character-by-character typing over HTTP.' },
+  { icon: '🎮', title: 'Remote & Touch', desc: 'Key presses, repeated inputs, character typing, and touch coordinates over HTTP.' },
   { icon: '📱', title: 'App Lifecycle', desc: 'Launch, install, deep link, send input params, and close apps programmatically.' },
   { icon: '📊', title: 'Device Queries', desc: 'Query device info, active app, installed apps, media player state, and channel performance.' },
-  { icon: '🌳', title: 'UI Tree Inspection', desc: 'Parse SceneGraph XML and query with CSS-like selectors. <code>Tag#name</code>, descendant, child, nth-child, siblings.' },
+  { icon: '🌳', title: 'UI Tree Inspection', desc: 'Parse SceneGraph XML and query with CSS-like selectors. Tag, name, attributes, descendants, nth-child, siblings.' },
   { icon: '📸', title: 'Screenshots', desc: 'Capture PNG screenshots from developer mode devices with digest auth.' },
-  { icon: '📦', title: 'Sideloading', desc: 'Deploy dev channel builds over HTTP. No manual upload needed.' },
+  { icon: '📦', title: 'Sideloading', desc: 'Deploy dev channel builds from zip files or directories. No manual upload needed.' },
   { icon: '🪵', title: 'Debug Console', desc: 'Read BrightScript console output on port 8085. Send commands like <code>bt</code> for backtraces.' },
-  { icon: '🐛', title: 'Console Parser', desc: 'Scan debug output for errors, crashes, exceptions, and backtraces as structured data.' },
+  { icon: '🐛', title: 'Log Parsing', desc: 'Structured parsing via roku-log — errors, crashes, backtraces, real-time streaming, and aggregation.' },
+  { icon: '⏳', title: 'Wait Helpers', desc: '<code>waitForElement</code>, <code>waitForFocus</code>, <code>waitForApp</code>, <code>waitForStable</code> — poll until conditions are met.' },
+  { icon: '⚠️', title: 'Typed Errors', desc: '<code>EcpTimeoutError</code>, <code>EcpHttpError</code>, <code>EcpAuthError</code> — clean error handling for every failure mode.' },
 ];
 
 const apiSections = [
   { name: 'discover()', desc: 'Find Roku devices via SSDP M-SEARCH' },
-  { name: 'new EcpClient(ip)', desc: 'Connect by IP with configurable port, password, timeout' },
-  { name: 'keypress / press / type', desc: 'Remote control input with repeat and delay' },
+  { name: 'new EcpClient(ip)', desc: 'Connect by IP with configurable port, password, timeout, cooldowns' },
+  { name: 'keypress / press / type / touch', desc: 'Remote control input, touch coordinates, repeat and delay' },
   { name: 'launch / deepLink / install', desc: 'App lifecycle management' },
   { name: 'queryDeviceInfo()', desc: 'Device model, firmware, serial, network info' },
   { name: 'queryActiveApp()', desc: 'Currently running app' },
@@ -26,6 +28,9 @@ const apiSections = [
   { name: 'readConsole / sendConsoleCommand', desc: 'BrightScript debug console (port 8085)' },
   { name: 'parseUiXml / findElement', desc: 'CSS selector engine for SceneGraph nodes' },
   { name: 'parseConsoleForIssues', desc: 'Structured error/crash/exception detection' },
+  { name: 'waitFor / waitForElement / waitForFocus', desc: 'Poll until conditions are met with configurable timeout' },
+  { name: 'LogParser / LogStream / LogSession', desc: 'Structured log parsing, real-time streaming, aggregation' },
+  { name: 'EcpHttpError / EcpTimeoutError', desc: 'Typed errors for clean catch handling' },
 ];
 ---
 
