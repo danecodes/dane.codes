@@ -165,7 +165,7 @@ ROKU_DEVICE_IP = "192.168.0.30"`}</code></pre>
 
         <h3>Smoke Test Example</h3>
         <pre><code>{`→ roku_smoke_test(
-    content_id: "GG5H5XQ7R",
+    content_id: "ABC123XYZ",
     media_type: "episode",
     ui_timeout: 15000,
     playback_timeout: 30000
@@ -176,7 +176,7 @@ ROKU_DEVICE_IP = "192.168.0.30"`}</code></pre>
     "message": "PASS: App launched, UI rendered, and playback started",
     "steps": [
       { "name": "launch", "passed": true,
-        "message": "Deep linked to \\"GG5H5XQ7R\\" in channel dev" },
+        "message": "Deep linked to \\"ABC123XYZ\\" in channel dev" },
       { "name": "ui_visible", "passed": true,
         "message": "UI rendered after 2340ms", "elapsed_ms": 2340 },
       { "name": "playback", "passed": true,
@@ -292,7 +292,7 @@ npx roku-mcp info player    # Playback state`}</code></pre>
 npx roku-dev test sideload-watch ./target/build.zip --duration 30000
 
 # Full smoke test with playback verification
-npx roku-dev test smoke --content-id GG5H5XQ7R --media-type episode
+npx roku-dev test smoke --content-id ABC123XYZ --media-type episode
 
 # Run cert preflight checklist
 npx roku-dev test cert-preflight

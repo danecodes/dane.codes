@@ -66,15 +66,15 @@ The loop is: agent reads the screen, decides what to do, does it, reads the scre
 
 Here's the thing nobody tells you about AI-powered device automation: the AI doesn't need to be brilliant. It needs to be *informed*.
 
-If you tell Claude "navigate to the search screen on Crunchyroll," it has no idea what that means structurally. The app could have any layout. The nav could be on the left, the top, behind a hamburger menu, or accessible only by pressing Back three times and then Right.
+If you tell Claude "navigate to the search screen on my streaming app," it has no idea what that means structurally. The app could have any layout. The nav could be on the left, the top, behind a hamburger menu, or accessible only by pressing Back three times and then Right.
 
 But if you give the agent a little context — even just a few sentences — everything changes. As of v0.3.2, roku-mcp has a built-in way to do this: drop a `roku-app.md` file in your project root.
 
 ```markdown
-## Crunchyroll Navigation
+## App Navigation
 
 The app uses a left-side nav menu. Press Left from any content screen
-to open it. Menu items from top to bottom: Home, Browse, Simulcasts,
+to open it. Menu items from top to bottom: Home, Browse, Library,
 My Lists, Settings. The Browse screen has genre rows. Select a genre
 to see the content grid.
 Search is accessible from the top of the nav menu.
@@ -91,14 +91,14 @@ Claude Code users: you can also just put this in your `CLAUDE.md` and it works t
 This is a real workflow. Not a demo. Not a mockup. This is what it actually looks like when you point Claude at a Roku.
 
 <Terminal title="navigating to a specific show" lines={[
-  { prompt: true, text: "find 'one piece' on crunchyroll and start the latest episode" },
+  { prompt: true, text: "find 'breaking bad' on the app and start the latest episode" },
   { text: "" },
   { text: "→ roku_press_key(key: 'Home')" },
   { text: "→ roku_launch(channel_id: 'dev')" },
   { text: "→ roku_wait_for(selector: 'HomeScreen', timeout: 10000)" },
   { text: "→ roku_press_key(key: 'Up', times: 5)    // reset to top nav" },
   { text: "→ roku_press_key(key: 'Select')           // open search" },
-  { text: "→ roku_type_text(text: 'one piece')" },
+  { text: "→ roku_type_text(text: 'breaking bad')" },
   { text: "→ roku_wait_for(selector: 'SearchResultItem', timeout: 5000)" },
   { text: "→ roku_press_key(key: 'Down')" },
   { text: "→ roku_press_key(key: 'Select')" },
@@ -106,8 +106,8 @@ This is a real workflow. Not a demo. Not a mockup. This is what it actually look
   { text: "→ roku_press_key(key: 'Select')" },
   { text: "→ roku_media_player()" },
   { text: "" },
-  { text: '  Playing: One Piece - Episode 1122 "The Brain of the Crew"' },
-  { text: "  State: play | Position: 00:00:04 | Duration: 00:23:41" },
+  { text: '  Playing: Breaking Bad - S05E16 "Felina"' },
+  { text: "  State: play | Position: 00:00:04 | Duration: 00:55:02" },
 ]} />
 
 The agent figured out the navigation. It used the search. It found the latest episode by reading the UI. It confirmed playback started. I typed one sentence.
@@ -124,10 +124,10 @@ This is where it gets practical. Not "cool demo" practical — "my engineering m
   { text: "  PASS: Install Success — no errors in 30s of console output" },
   { text: "  Errors: 0 | Crashes: 0 | Exceptions: 0" },
   { text: "" },
-  { text: "→ roku_smoke_test(content_id: 'GG5H5XQ7R', media_type: 'episode')" },
+  { text: "→ roku_smoke_test(content_id: 'ABC123XYZ', media_type: 'episode')" },
   { text: "" },
   { text: "  PASS: App launched, UI rendered, and playback started" },
-  { text: "  ✓ launch     — Deep linked to 'GG5H5XQ7R' in channel dev" },
+  { text: "  ✓ launch     — Deep linked to 'ABC123XYZ' in channel dev" },
   { text: "  ✓ ui_visible — UI rendered after 2340ms" },
   { text: "  ✓ playback   — Player reached 'play' after 8710ms" },
 ]} />

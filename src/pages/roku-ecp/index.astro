@@ -82,7 +82,7 @@ const roku = await EcpClient.discover();
 // Remote control
 await roku.press(Key.Down, { times: 3 });
 await roku.press(Key.Select);
-await roku.type('one piece');
+await roku.type('breaking bad');
 
 // Inspect the UI tree with CSS selectors
 const xml = await roku.queryAppUi();
