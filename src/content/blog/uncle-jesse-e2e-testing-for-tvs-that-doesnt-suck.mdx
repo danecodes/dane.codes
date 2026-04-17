@@ -6,7 +6,7 @@ tags: ["roku", "testing", "typescript", "open-source"]
 ---
 
 import Terminal from '../../components/Terminal.astro';
-import Diagram from '../../components/Diagram.astro';
+import Sketch from '../../components/Sketch.astro';
 
 It's 4 PM. You're trying to verify a navigation fix before the cert submission deadline. Your Appium server crashes for the third time. The WebDriver session expired again. Someone on the team asks "did you try restarting Java?" and you seriously consider a career change. You're using a framework designed for mobile phones to test a TV, routed through a protocol designed for web browsers, connected to a device that speaks none of these languages.
 
@@ -145,18 +145,7 @@ There's a full [migration guide](https://dane.codes/uncle-jesse/migration) if yo
 
 ## The Stack
 
-<Diagram caption="Your tests never touch Java. That's the point.">
-{`flowchart TD
-    A["Your Tests<br/>(vitest)"] --> B["uncle-jesse-test<br/>focusPath, assertions, replay"]
-    B --> C["uncle-jesse-core<br/>TVDevice, LiveElement, BasePage"]
-    C --> D["uncle-jesse-roku<br/>RokuAdapter + roku-ecp"]
-    D --> E["Roku Device<br/>ECP on :8060"]
-    style A fill:#242424,stroke:#58a6ff,color:#ede9e3
-    style B fill:#1a1a1a,stroke:#58a6ff,color:#ede9e3
-    style C fill:#1a1a1a,stroke:#58a6ff,color:#ede9e3
-    style D fill:#1a1a1a,stroke:#3fb950,color:#ede9e3
-    style E fill:#0f0f0f,stroke:#2e2e2e,color:#9a9590`}
-</Diagram>
+<Sketch src="/diagrams/uj-stack.svg" caption="Your tests never touch Java. That's the point." />
 
 Everything flows down through clean layers. The core is platform-agnostic. `TVDevice` and `LiveElement` don't know about Roku. The Roku adapter wraps [roku-ecp](https://dane.codes/roku-ecp) and handles the Roku-specific translation. When other TV platforms get adapter support, your tests don't change.
 

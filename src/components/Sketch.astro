@@ -1,0 +1,42 @@
+---
+interface Props {
+  src: string;
+  caption?: string;
+}
+
+const { src, caption } = Astro.props;
+---
+
+<figure class="sketch">
+  <div class="sketch-container">
+    <img src={src} alt={caption || 'Diagram'} loading="lazy" />
+  </div>
+  {caption && <figcaption>{caption}</figcaption>}
+</figure>
+
+<style>
+  .sketch {
+    margin: 32px 0;
+    text-align: center;
+  }
+
+  .sketch-container {
+    border: 1px solid #2e2e2e;
+    border-radius: 8px;
+    overflow: hidden;
+    background: #0f0f0f;
+  }
+
+  .sketch-container img {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+
+  figcaption {
+    font-size: 0.8125rem;
+    color: #9a9590;
+    margin-top: 10px;
+    font-style: italic;
+  }
+</style>

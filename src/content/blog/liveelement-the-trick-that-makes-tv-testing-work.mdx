@@ -6,7 +6,7 @@ tags: ["roku", "testing", "typescript", "uncle-jesse"]
 ---
 
 import Terminal from '../../components/Terminal.astro';
-import Diagram from '../../components/Diagram.astro';
+import Sketch from '../../components/Sketch.astro';
 
 You find an element on screen. You store a reference to it. You do something. Press a button, navigate, wait for a loading spinner to go away. Now you want to check that element again. Is it still there? Did the text change? Does it have focus?
 
@@ -41,18 +41,7 @@ await homeScreen.getText();        // queries tree again, returns text attr
 
 Three method calls, three HTTP requests, three fresh snapshots. No stale data. No "element not found because the screen changed 200ms ago."
 
-<Diagram caption="LiveElement doesn't cache. Every call goes to the device.">
-{`flowchart LR
-    A["homeScreen.isDisplayed()"] -->|"GET /query/app-ui"| B["Roku :8060"]
-    B -->|"Fresh XML"| C["Parse → Find HomeScreen → Check visible"]
-    D["homeScreen.isFocused()"] -->|"GET /query/app-ui"| B
-    E["homeScreen.getText()"] -->|"GET /query/app-ui"| B
-    style A fill:#242424,stroke:#58a6ff,color:#ede9e3
-    style D fill:#242424,stroke:#58a6ff,color:#ede9e3
-    style E fill:#242424,stroke:#58a6ff,color:#ede9e3
-    style B fill:#1a1a1a,stroke:#3fb950,color:#ede9e3
-    style C fill:#0f0f0f,stroke:#2e2e2e,color:#9a9590`}
-</Diagram>
+<Sketch src="/diagrams/liveelement-flow.svg" caption="LiveElement doesn't cache. Every call goes to the device." />
 
 ## The Cost
 

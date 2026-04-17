@@ -6,7 +6,7 @@ tags: ["roku", "mcp", "ai", "ott", "open-source"]
 ---
 
 import Terminal from '../../components/Terminal.astro';
-import Diagram from '../../components/Diagram.astro';
+import Sketch from '../../components/Sketch.astro';
 
 In the [last post](https://dane.codes/blog/roku-ecp-the-library-roku-should-have-built/), I wrote about [roku-ecp](https://github.com/danecodes/roku-ecp), a TypeScript client that wraps Roku's External Control Protocol into something a human can actually use. That library solved the "why am I writing curl commands in 2026" problem.
 
@@ -48,17 +48,7 @@ That's it. Your AI agent now has 20+ tools for controlling a Roku device. The Ro
 
 The agent isn't blindly mashing buttons. It can read the SceneGraph UI tree, the actual component hierarchy that makes up what's on screen. It knows what's focused. It knows what text is displayed. It can find elements by CSS-like selectors.
 
-<Diagram caption="The agent has eyes. It sees the UI tree, acts on it, and verifies the result.">
-{`flowchart LR
-    A["AI Agent<br/>(Claude, Copilot, etc.)"] -->|"1. MCP Tool Call"| B["roku-mcp<br/>Server"]
-    B -->|"2. roku-ecp"| C["Roku Device<br/>:8060"]
-    C -->|"3. SceneGraph XML"| B
-    B -->|"4. Parsed UI Tree"| A
-    A -->|"5. Next action"| B
-    style A fill:#242424,stroke:#fa520f,color:#ede9e3
-    style B fill:#1a1a1a,stroke:#ffa110,color:#ede9e3
-    style C fill:#0f0f0f,stroke:#2e2e2e,color:#9a9590`}
-</Diagram>
+<Sketch src="/diagrams/mcp-agent-loop.svg" caption="The agent has eyes. It sees the UI tree, acts on it, and verifies the result." />
 
 The loop is: agent reads the screen, decides what to do, does it, reads the screen again. Sound familiar? That's how a person uses a TV. Except the agent is faster and doesn't get distracted by whatever's autoplaying on the home screen.
 
@@ -158,26 +148,7 @@ The tools to automate this have always existed in theory. ECP has been there the
 
 roku-mcp closes that gap. Give it a device IP, give the agent some basic app knowledge, and you've got a QA automation system that can navigate your app, verify behavior, catch crashes, and report results. All through natural language.
 
-<Diagram caption="The shift: from manual QA to conversational QA.">
-{`flowchart LR
-    subgraph Before["Before"]
-        direction TB
-        B1["Manual button pressing"] --> B2["Squint at console"] --> B3["Hope for the best"]
-    end
-    subgraph After["After"]
-        direction TB
-        A1["'Test the browse flow'"] --> A2["Agent navigates + verifies"] --> A3["Pass/fail report"]
-    end
-    Before -.->|"roku-mcp"| After
-    style Before fill:#1a1a1a,stroke:#2e2e2e,color:#9a9590
-    style After fill:#1a1a1a,stroke:#fa520f,color:#ede9e3
-    style B1 fill:#0f0f0f,stroke:#2e2e2e,color:#9a9590
-    style B2 fill:#0f0f0f,stroke:#2e2e2e,color:#9a9590
-    style B3 fill:#0f0f0f,stroke:#2e2e2e,color:#9a9590
-    style A1 fill:#242424,stroke:#ffa110,color:#ede9e3
-    style A2 fill:#242424,stroke:#ffa110,color:#ede9e3
-    style A3 fill:#242424,stroke:#ffa110,color:#ede9e3`}
-</Diagram>
+<Sketch src="/diagrams/mcp-before-after.svg" caption="The shift: from manual QA to conversational QA." />
 
 Is it going to replace a full QA team? No. Don't be weird about it. But it's going to catch the dumb stuff faster, it's going to run the repetitive checks without complaining, and it's going to do it at 2 AM when you push a build and nobody's awake to manually verify it.
 

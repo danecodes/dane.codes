@@ -6,7 +6,7 @@ tags: ["roku", "ott", "typescript", "open-source"]
 ---
 
 import Terminal from '../../components/Terminal.astro';
-import Diagram from '../../components/Diagram.astro';
+import Sketch from '../../components/Sketch.astro';
 
 Every Roku device ships with a hidden superpower that almost nobody uses correctly: the [External Control Protocol](https://developer.roku.com/docs/developer-program/dev-tools/external-control-api.md). It's an HTTP API sitting on port 8060 that lets you do basically anything. Press buttons, launch apps, query device state, inspect the entire SceneGraph UI tree. It's been there for years. It's documented. It works.
 
@@ -18,20 +18,7 @@ So I built [roku-ecp](https://github.com/danecodes/roku-ecp).
 
 For the uninitiated: ECP is Roku's way of letting external programs talk to the device over HTTP. Your Roku is a tiny web server. You send it requests, it does things. It's beautifully simple and criminally underutilized.
 
-<Diagram caption="Your code talks to port 8060. The Roku does the thing. That's it.">
-{`flowchart LR
-    A["Your Code<br/>(Node.js)"] -->|HTTP| B["Roku Device<br/>:8060"]
-    B -->|"POST /keypress"| C["Remote Control"]
-    B -->|"GET /query"| D["Device State"]
-    B -->|"GET /query/app-ui"| E["SceneGraph Tree"]
-    B -->|"POST /install"| F["App Lifecycle"]
-    style A fill:#242424,stroke:#fa520f,color:#ede9e3
-    style B fill:#1a1a1a,stroke:#ffa110,color:#ede9e3
-    style C fill:#0f0f0f,stroke:#2e2e2e,color:#9a9590
-    style D fill:#0f0f0f,stroke:#2e2e2e,color:#9a9590
-    style E fill:#0f0f0f,stroke:#2e2e2e,color:#9a9590
-    style F fill:#0f0f0f,stroke:#2e2e2e,color:#9a9590`}
-</Diagram>
+<Sketch src="/diagrams/ecp-arch.svg" caption="Your code talks to port 8060. The Roku does the thing. That's it." />
 
 The problem is that "simple HTTP API" still means hand-managing URLs, parsing XML responses, remembering which key name is `Lit_` prefixed and which isn't, and generally doing a bunch of tedious plumbing every single time you want to automate something on a Roku.
 
@@ -134,22 +121,7 @@ const first = findElement(tree, 'RowItem:first-child');
 
 If you've ever written a web test with CSS selectors, you already know how to navigate a Roku UI tree. That was the whole point. The Roku ecosystem has been stuck in "parse XML with regex" mode for years, and I wanted something that felt like the tools web developers have had since 2005.
 
-<Diagram caption="roku-ecp turns raw SceneGraph XML into something you can actually query.">
-{`flowchart TD
-    A["GET /query/app-ui"] -->|"Raw XML<br/>(40KB of pain)"| B["parseUiXml()"]
-    B --> C["UiNode Tree"]
-    C --> D["findElement(tree, 'AppButton#play')"]
-    C --> E["findFocused(tree)"]
-    C --> F["findElements(tree, 'Label')"]
-    C --> G["formatTree(tree, depth: 3)"]
-    style A fill:#242424,stroke:#fa520f,color:#ede9e3
-    style B fill:#242424,stroke:#ffa110,color:#ede9e3
-    style C fill:#1a1a1a,stroke:#ffa110,color:#ede9e3
-    style D fill:#0f0f0f,stroke:#2e2e2e,color:#9a9590
-    style E fill:#0f0f0f,stroke:#2e2e2e,color:#9a9590
-    style F fill:#0f0f0f,stroke:#2e2e2e,color:#9a9590
-    style G fill:#0f0f0f,stroke:#2e2e2e,color:#9a9590`}
-</Diagram>
+<Sketch src="/diagrams/ecp-pipeline.svg" caption="roku-ecp turns raw SceneGraph XML into something you can actually query." />
 
 ## The Full Picture
 
