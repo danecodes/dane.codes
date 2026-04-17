@@ -121,8 +121,15 @@ const hero = findElement(tree, 'HomePage HomeHeroCarousel');
 // Direct child
 const label = findElement(tree, 'LayoutGroup > AppLabel');
 
-// What's focused right now?
-const focused = findFocused(tree);
+// Attribute selectors
+const focused = findElement(tree, '[focused="true"]');
+const episodes = findElement(tree, '[text^="Episode"]');
+const images = findElement(tree, '[uri$=".png"]');
+
+// Pseudo-classes
+const playBtn = findElement(tree, 'AppButton:has(AppLabel[text="Play"])');
+const unfocused = findElement(tree, 'NavTab:not([focused="true"])');
+const first = findElement(tree, 'RowItem:first-child');
 ```
 
 If you've ever written a web test with CSS selectors, you already know how to navigate a Roku UI tree. That was the whole point. The Roku ecosystem has been stuck in "parse XML with regex" mode for years, and I wanted something that felt like the tools web developers have had since 2005.
@@ -150,13 +157,16 @@ Here's what roku-ecp actually covers:
 
 | Feature | What it does |
 |---------|-------------|
-| **Remote input** | Keypress, keydown/up, repeated press with delay, character-by-character typing |
+| **Remote input** | Keypress, keydown/up, repeated press with delay, character-by-character typing, touch coordinates |
 | **Device queries** | Device info, active app, installed apps, media player state |
 | **App lifecycle** | Launch, install, deep link, send input params, close |
-| **UI inspection** | Parse SceneGraph XML, CSS selectors, find focused element, format tree |
-| **Sideloading** | Deploy `.zip` to dev channel over digest auth |
+| **UI inspection** | Parse SceneGraph XML, CSS selectors with `:has()`, `:not()`, attribute matching, find focused element |
+| **Wait helpers** | `waitForElement`, `waitForFocus`, `waitForApp`, `waitForText`, `waitForStable` — poll with configurable timeout |
+| **Sideloading** | Deploy `.zip` files or directories to dev channel over digest auth |
 | **Screenshots** | Capture device screen as PNG buffer |
 | **Debug console** | Read BrightScript console output, send commands, parse for errors/crashes |
+| **Log parsing** | Structured log parsing via roku-log — `LogParser`, `LogStream`, `LogSession` for real-time streaming and aggregation |
+| **Typed errors** | `EcpTimeoutError`, `EcpHttpError`, `EcpAuthError` — clean catch handling for every failure mode |
 | **Discovery** | SSDP auto-discovery of Roku devices on the network |
 
 All of that. One package. `@danecodes/roku-ecp`. No transitive dependency hell. No native binaries. No "please install Java 11 and also Maven and also cry."
