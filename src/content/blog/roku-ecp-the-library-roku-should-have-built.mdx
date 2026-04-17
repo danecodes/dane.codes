@@ -8,7 +8,7 @@ tags: ["roku", "ott", "typescript", "open-source"]
 import Terminal from '../../components/Terminal.astro';
 import Diagram from '../../components/Diagram.astro';
 
-Every Roku device ships with a hidden superpower that almost nobody uses correctly: the [External Control Protocol](https://developer.roku.com/docs/developer-program/dev-tools/external-control-api.md). It's an HTTP API sitting on port 8060 that lets you do basically anything — press buttons, launch apps, query device state, inspect the entire SceneGraph UI tree. It's been there for years. It's documented. It works.
+Every Roku device ships with a hidden superpower that almost nobody uses correctly: the [External Control Protocol](https://developer.roku.com/docs/developer-program/dev-tools/external-control-api.md). It's an HTTP API sitting on port 8060 that lets you do basically anything. Press buttons, launch apps, query device state, inspect the entire SceneGraph UI tree. It's been there for years. It's documented. It works.
 
 And somehow, in the year of our lord 2026, the official tooling for interacting with it is still "write your own `curl` commands and parse XML with your eyes."
 
@@ -103,7 +103,7 @@ const devices = await EcpClient.discoverAll();
 
 ## CSS-Like Selectors for SceneGraph
 
-This is the part where it gets genuinely useful and not just "nice wrapper around curl."
+This is where it stops being a nice wrapper around curl.
 
 Roku's SceneGraph UI tree is XML. Big, nested, deeply annoying XML. roku-ecp parses it into a traversable tree and gives you CSS-like selectors to query it:
 
@@ -161,27 +161,27 @@ Here's what roku-ecp actually covers:
 | **Device queries** | Device info, active app, installed apps, media player state |
 | **App lifecycle** | Launch, install, deep link, send input params, close |
 | **UI inspection** | Parse SceneGraph XML, CSS selectors with `:has()`, `:not()`, attribute matching, find focused element |
-| **Wait helpers** | `waitForElement`, `waitForFocus`, `waitForApp`, `waitForText`, `waitForStable` — poll with configurable timeout |
+| **Wait helpers** | `waitForElement`, `waitForFocus`, `waitForApp`, `waitForText`, `waitForStable`. Poll with configurable timeout |
 | **Sideloading** | Deploy `.zip` files or directories to dev channel over digest auth |
 | **Screenshots** | Capture device screen as PNG buffer |
 | **Debug console** | Read BrightScript console output, send commands, parse for errors/crashes |
-| **Log parsing** | Structured log parsing via roku-log — `LogParser`, `LogStream`, `LogSession` for real-time streaming and aggregation |
-| **Typed errors** | `EcpTimeoutError`, `EcpHttpError`, `EcpAuthError` — clean catch handling for every failure mode |
+| **Log parsing** | Structured log parsing via roku-log. `LogParser`, `LogStream`, `LogSession` for real-time streaming and aggregation |
+| **Typed errors** | `EcpTimeoutError`, `EcpHttpError`, `EcpAuthError`. Clean catch handling for every failure mode |
 | **Discovery** | SSDP auto-discovery of Roku devices on the network |
 
 All of that. One package. `@danecodes/roku-ecp`. No transitive dependency hell. No native binaries. No "please install Java 11 and also Maven and also cry."
 
 ## Why This Matters
 
-Look, I've been building Roku apps for a long time. The platform is powerful and the hardware is everywhere — there are literally more Roku devices in the US than people in Canada. But the developer tooling has always been... let's say "character building."
+Look, I've been building Roku apps for a long time. The platform is powerful and the hardware is everywhere. There are literally more Roku devices in the US than people in Canada. But the developer tooling has always been... let's say "character building."
 
-Every Roku team I've worked on — Hulu, Crunchyroll, everywhere — has had some version of these scripts lying around. Little Node scripts. Bash one-liners. Someone's Python thing that kind of works but only on their machine. Everyone is reinventing the same wheel, and the wheel is always a little wobbly.
+Every Roku team I've worked on (Hulu, Crunchyroll, everywhere) has had some version of these scripts lying around. Little Node scripts. Bash one-liners. Someone's Python thing that kind of works but only on their machine. Everyone is reinventing the same wheel, and the wheel is always a little wobbly.
 
 roku-ecp is my attempt to build the wheel once, properly, so nobody has to think about port 8060 ever again.
 
 ## What's Next
 
-This library is the foundation. Next post, I'll write about [roku-mcp](https://github.com/danecodes/roku-mcp) — an MCP server that sits on top of roku-ecp and lets AI agents like Claude directly control your Roku. Inspect the UI, navigate menus, take screenshots, debug crashes — all through natural language tool calls.
+This library is the foundation. Next post, I'll write about [roku-mcp](https://github.com/danecodes/roku-mcp), an MCP server that sits on top of roku-ecp and lets AI agents like Claude directly control your Roku. Inspect the UI, navigate menus, take screenshots, debug crashes. All through natural language tool calls.
 
 Because if I'm going to automate my TV, I'm going to *really* automate my TV.
 

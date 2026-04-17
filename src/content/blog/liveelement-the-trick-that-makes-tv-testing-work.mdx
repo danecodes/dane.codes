@@ -8,9 +8,7 @@ tags: ["roku", "testing", "typescript", "uncle-jesse"]
 import Terminal from '../../components/Terminal.astro';
 import Diagram from '../../components/Diagram.astro';
 
-Here's the fundamental problem with testing a TV app.
-
-You find an element on screen. You store a reference to it. You do something — press a button, navigate, wait for a loading spinner to go away. Now you want to check that element again. Is it still there? Did the text change? Does it have focus?
+You find an element on screen. You store a reference to it. You do something. Press a button, navigate, wait for a loading spinner to go away. Now you want to check that element again. Is it still there? Did the text change? Does it have focus?
 
 In a browser, this mostly works. The DOM is persistent. Your element reference is a pointer to a real object in memory. It's still valid after the page updates (usually). Playwright and Cypress built empires on this assumption.
 
@@ -18,13 +16,13 @@ On a Roku, that assumption is wrong.
 
 The SceneGraph UI tree isn't a persistent DOM you hold references into. It's an XML document that you fetch over HTTP from port 8060. Every time you call `GET /query/app-ui`, you get a fresh snapshot. Your old snapshot is immediately stale. There's no persistent object graph. There are no stable element IDs. There's just "here's what the screen looks like right now," over and over again.
 
-Every Roku test framework I've worked with — and I've worked with several across Hulu, Disney, and Crunchyroll — handles this the same way: fetch the tree, find your element, do your thing, fetch the tree again, find the element again, hope it's the same one. It's manual, repetitive, and the source of about 80% of the boilerplate in any Roku test file.
+Every Roku test framework I've worked with handles this the same way. I've seen it at Hulu, Disney, Crunchyroll. Fetch the tree, find your element, do your thing, fetch the tree again, find the element again, hope it's the same one. It's manual, repetitive, and the source of about 80% of the boilerplate in any Roku test file.
 
 LiveElement fixes this.
 
 ## What It Is
 
-`LiveElement` is a lazy, persistent reference to a UI element that re-queries the device on every method call. You create it once with a selector. Every time you ask it a question — is it displayed? is it focused? what's the text? — it goes back to the device, fetches the current tree, runs the selector, and gives you the answer.
+`LiveElement` is a lazy, persistent reference to a UI element that re-queries the device on every method call. You create it once with a selector. Every time you ask it a question (is it displayed? is it focused? what's the text?) it goes back to the device, fetches the current tree, runs the selector, and gives you the answer.
 
 ```typescript
 import { LiveElement } from '@danecodes/uncle-jesse-core';
@@ -56,13 +54,13 @@ Three method calls, three HTTP requests, three fresh snapshots. No stale data. N
     style C fill:#0f0f0f,stroke:#2e2e2e,color:#9a9590`}
 </Diagram>
 
-## Why This Matters More Than It Sounds
+## The Cost
 
-"It re-queries every time" sounds like a performance problem. It's not. It's the entire design.
+"It re-queries every time" sounds like a performance problem. It's not. It's the design.
 
-The Roku ECP response time for `GET /query/app-ui` is typically 30–80ms on a modern device. That's fast enough that you don't notice the cost, and it buys you something far more valuable: **your tests never lie about what's on screen.**
+The Roku ECP response time for `GET /query/app-ui` is typically 30–80ms on a modern device. That's fast enough that you don't notice the cost, and it buys you the only thing that matters: **your tests never lie about what's on screen.**
 
-Compare this to the alternative — what every other Roku testing approach does:
+Compare this to what every other Roku testing approach does:
 
 ```typescript
 // The old way: fetch once, hold a stale reference
@@ -97,7 +95,7 @@ Same reference. Always current. You never think about tree freshness again.
 
 ## Chaining: Scoped Queries
 
-LiveElement supports chaining, and this is where it gets powerful. When you call `$()` on a LiveElement, the child query is scoped to the parent's subtree:
+LiveElement supports chaining. When you call `$()` on a LiveElement, the child query is scoped to the parent's subtree:
 
 ```typescript
 const home = new LiveElement(tv, 'HomeScreen');
@@ -128,7 +126,7 @@ const searchInput = tv.$('TextInput#search');
 await searchInput.clear();     // backspace for each character
 ```
 
-`focus()` is worth calling out. On a TV, you can't click an element — you have to navigate to it with the D-pad. LiveElement reads the element's bounds from the SceneGraph, calculates which direction to press, and navigates there. It re-queries after each key press to verify it's making progress. If focus doesn't land where expected, it adjusts.
+`focus()` is the interesting one here. On a TV, you can't click an element. You have to navigate to it with the D-pad. LiveElement reads the element's bounds from the SceneGraph, figures out which direction to press, and navigates there. It re-queries after each key press to verify it's making progress. If focus doesn't land where expected, it adjusts.
 
 This is the kind of thing that takes 40 lines of imperative code in a traditional Roku test. With LiveElement it's one method call.
 
@@ -171,7 +169,7 @@ vs.
 await homeScreen.toBeDisplayed({ timeout: 10000 });
 ```
 
-Same behavior. One line. And the assertion gives you a useful error message when it fails — not just "expected true to be true."
+Same behavior. One line. And the assertion gives you a useful error message when it fails, not just "expected true to be true."
 
 ## Staleness Detection
 
@@ -189,11 +187,11 @@ await title.getText();  // "Home"
 const stale = await title.isStale();  // true if attributes differ from first query
 ```
 
-This is useful for detecting that a navigation actually happened — if the title element's text is different from what it was before you pressed keys, the screen changed. Combined with `waitForStable()`, you can write navigation assertions that don't depend on timing.
+This is useful for detecting that a navigation actually happened. If the title's text is different from what it was before you pressed keys, the screen changed. Combine this with `waitForStable()` and you can write navigation assertions that don't depend on timing.
 
 ## Element Collections
 
-`$$` returns an `ElementCollection` — the multi-element equivalent of LiveElement. Same lazy re-query behavior, but for lists.
+`$$` returns an `ElementCollection`. It's the multi-element version of LiveElement. Same lazy re-query behavior, but for lists.
 
 ```typescript
 const rows = home.$$('RowListItem');

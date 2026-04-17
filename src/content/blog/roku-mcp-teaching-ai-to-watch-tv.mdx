@@ -1,20 +1,20 @@
 ---
 title: "roku-mcp: Teaching AI Agents to Use a Television"
 date: "2026-04-15"
-description: "I built an MCP server that lets Claude, Copilot, and Codex directly control a Roku — inspect the UI, navigate menus, take screenshots, run smoke tests. All you need is the device IP and some basic knowledge of your app's layout. Here's what that looks like in practice."
+description: "I built an MCP server that lets Claude, Copilot, and Codex directly control a Roku. Inspect the UI, navigate menus, take screenshots, run smoke tests. All you need is the device IP and some basic knowledge of your app's layout. Here's what that looks like in practice."
 tags: ["roku", "mcp", "ai", "ott", "open-source"]
 ---
 
 import Terminal from '../../components/Terminal.astro';
 import Diagram from '../../components/Diagram.astro';
 
-In the [last post](https://dane.codes/blog/roku-ecp-the-library-roku-should-have-built/), I wrote about [roku-ecp](https://github.com/danecodes/roku-ecp) — a TypeScript client that wraps Roku's External Control Protocol into something a human can actually use. That library solved the "why am I writing curl commands in 2026" problem.
+In the [last post](https://dane.codes/blog/roku-ecp-the-library-roku-should-have-built/), I wrote about [roku-ecp](https://github.com/danecodes/roku-ecp), a TypeScript client that wraps Roku's External Control Protocol into something a human can actually use. That library solved the "why am I writing curl commands in 2026" problem.
 
 This post is about what happens when you hand those capabilities to an AI agent and say "here, you figure it out."
 
-[roku-mcp](https://github.com/danecodes/roku-mcp) is an MCP server that sits on top of roku-ecp and exposes every Roku interaction as a tool that AI agents can call. Claude Code, Cursor, Copilot, Codex — anything that speaks [Model Context Protocol](https://modelcontextprotocol.io/) can now see your TV screen, press buttons, launch apps, read the debug console, and run smoke tests.
+[roku-mcp](https://github.com/danecodes/roku-mcp) is an MCP server that sits on top of roku-ecp and exposes every Roku interaction as a tool that AI agents can call. Claude Code, Cursor, Copilot, Codex. Anything that speaks [Model Context Protocol](https://modelcontextprotocol.io/) can now see your TV screen, press buttons, launch apps, read the debug console, and run smoke tests.
 
-And the wild part? It's actually good at it.
+It's actually good at it.
 
 ## The Setup
 
@@ -42,11 +42,11 @@ Then drop this in your `.mcp.json`:
 }
 ```
 
-That's it. Your AI agent now has 20+ tools for controlling a Roku device. The entire Roku is now a peripheral.
+That's it. Your AI agent now has 20+ tools for controlling a Roku device. The Roku is a peripheral now.
 
 ## What the Agent Can See
 
-This is the part people don't get until they see it. The agent isn't just blindly mashing buttons. It can read the SceneGraph UI tree — the actual component hierarchy that makes up what's on screen. It knows what's focused. It knows what text is displayed. It can find elements by CSS-like selectors.
+The agent isn't blindly mashing buttons. It can read the SceneGraph UI tree, the actual component hierarchy that makes up what's on screen. It knows what's focused. It knows what text is displayed. It can find elements by CSS-like selectors.
 
 <Diagram caption="The agent has eyes. It sees the UI tree, acts on it, and verifies the result.">
 {`flowchart LR
@@ -64,11 +64,11 @@ The loop is: agent reads the screen, decides what to do, does it, reads the scre
 
 ## The Secret Ingredient: App Knowledge
 
-Here's the thing nobody tells you about AI-powered device automation: the AI doesn't need to be brilliant. It needs to be *informed*.
+The AI doesn't need to be brilliant. It needs to be *informed*.
 
 If you tell Claude "navigate to the search screen on my streaming app," it has no idea what that means structurally. The app could have any layout. The nav could be on the left, the top, behind a hamburger menu, or accessible only by pressing Back three times and then Right.
 
-But if you give the agent a little context — even just a few sentences — everything changes. As of v0.3.2, roku-mcp has a built-in way to do this: drop a `roku-app.md` file in your project root.
+But if you give the agent a little context, even just a few sentences, everything changes. As of v0.3.2, roku-mcp has a built-in way to do this: drop a `roku-app.md` file in your project root.
 
 ```markdown
 ## App Navigation
@@ -80,11 +80,11 @@ to see the content grid.
 Search is accessible from the top of the nav menu.
 ```
 
-That's it. The MCP server reads it at startup and feeds it to every connected agent automatically. No config needed — if the file exists, it's used. You can also set `ROKU_APP_CONTEXT` in your env to point at a different path.
+That's it. The MCP server reads it at startup and feeds it to every connected agent automatically. No config needed. If the file exists, it's used. You can also set `ROKU_APP_CONTEXT` in your env to point at a different path.
 
 That paragraph, plus the ability to read the UI tree, is enough for an AI agent to navigate an entire streaming application. It doesn't need a complete map. It needs the same rough mental model that a QA tester builds in their first hour with the app.
 
-Claude Code users: you can also just put this in your `CLAUDE.md` and it works the same way — the agent picks it up as project context. The `roku-app.md` approach is nice because it's tool-agnostic and travels with the MCP server, but use whichever fits your workflow.
+Claude Code users: you can also just put this in your `CLAUDE.md` and it works the same way. The agent picks it up as project context. The `roku-app.md` approach is nice because it's tool-agnostic and travels with the MCP server, but use whichever fits your workflow.
 
 ## Actual Conversations I've Had With My TV
 
@@ -114,7 +114,7 @@ The agent figured out the navigation. It used the search. It found the latest ep
 
 ## Smoke Testing a Dev Build
 
-This is where it gets practical. Not "cool demo" practical — "my engineering manager wants to see this" practical.
+Not "cool demo" practical. "My engineering manager wants to see this" practical.
 
 <Terminal title="sideload and smoke test" lines={[
   { prompt: true, text: "sideload ./builds/latest.zip and run a smoke test" },
@@ -134,7 +134,7 @@ This is where it gets practical. Not "cool demo" practical — "my engineering m
 
 Sideload a zip, watch the console for BrightScript errors, deep link to a specific piece of content, verify the UI renders, verify playback starts, report pass/fail. That's a real CI-quality smoke test, driven entirely by an AI agent, in about 45 seconds.
 
-Every Roku team I've ever been on has wanted this. The test infrastructure to do it traditionally would be Selenium Grid or Appium — Java dependencies, flaky WebDriver connections, a dedicated test device farm. This is a single npm package and an HTTP connection to port 8060.
+Every Roku team I've ever been on has wanted this. The test infrastructure to do it traditionally would be Selenium Grid or Appium. Java dependencies, flaky WebDriver connections, a dedicated test device farm. This is a single npm package and an HTTP connection to port 8060.
 
 ## The Full Toolkit
 
@@ -148,15 +148,15 @@ The MCP server exposes these tools to the agent:
 | **Debug** | `roku_console_log`, `roku_console_command`, `roku_console_watch` | Read BrightScript console, send debug commands |
 | **Testing** | `roku_wait_for`, `roku_assert_element`, `roku_sideload_and_watch`, `roku_smoke_test`, `roku_cert_preflight`, `roku_chanperf_sample` | Full shift-left QA pipeline |
 
-That last row is important. `roku_cert_preflight` runs through the Roku certification checklist — back navigation, Home key exit, relaunch behavior, error scanning. The stuff that gets your channel rejected from the Roku store. An AI agent can now run your cert checklist for you.
+That last row is important. `roku_cert_preflight` runs through the Roku certification checklist: back navigation, Home key exit, relaunch behavior, error scanning. The stuff that gets your channel rejected from the Roku store. An AI agent can now run your cert checklist for you.
 
 ## Why This Actually Matters
 
 I've been building Roku apps for a decade. The platform testing story has always been: you put a device on your desk, you press buttons manually, you squint at the BrightScript console, and you hope you catch the crash before the cert team does.
 
-The tools to automate this have always existed in theory — ECP has been there the whole time. But the gap between "there's an HTTP API" and "I can have a conversation with my TV" was too wide for most teams to bridge. You'd need custom scripting, XML parsing, state management, error handling, and the patience of a person who enjoys writing infrastructure that nobody will ever thank you for.
+The tools to automate this have always existed in theory. ECP has been there the whole time. But the gap between "there's an HTTP API" and "I can have a conversation with my TV" was too wide for most teams to bridge. You'd need custom scripting, XML parsing, state management, error handling, and the patience of a person who enjoys writing infrastructure that nobody will ever thank you for.
 
-roku-mcp closes that gap. Give it a device IP, give the agent some basic app knowledge, and you've got a QA automation system that can navigate your app, verify behavior, catch crashes, and report results — all through natural language.
+roku-mcp closes that gap. Give it a device IP, give the agent some basic app knowledge, and you've got a QA automation system that can navigate your app, verify behavior, catch crashes, and report results. All through natural language.
 
 <Diagram caption="The shift: from manual QA to conversational QA.">
 {`flowchart LR
@@ -189,4 +189,4 @@ npm install -g @danecodes/roku-mcp
 
 Works with Claude Code, Cursor, Copilot, Codex, or anything else that speaks MCP. Repo is at [github.com/danecodes/roku-mcp](https://github.com/danecodes/roku-mcp).
 
-The TV is listening. Might as well talk to it.
+Your TV's been listening on port 8060 this whole time. Might as well say something.

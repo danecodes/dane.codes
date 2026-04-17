@@ -8,8 +8,6 @@ tags: ["roku", "testing", "typescript", "open-source"]
 import Terminal from '../../components/Terminal.astro';
 import Diagram from '../../components/Diagram.astro';
 
-Let me describe a scene that every Roku developer on earth has lived through.
-
 It's 4 PM. You're trying to verify a navigation fix before the cert submission deadline. Your Appium server crashes for the third time. The WebDriver session expired again. Someone on the team asks "did you try restarting Java?" and you seriously consider a career change. You're using a framework designed for mobile phones to test a TV, routed through a protocol designed for web browsers, connected to a device that speaks none of these languages.
 
 This is the state of the art. In 2026. For a platform with more devices in the US than there are people in Canada.
@@ -18,7 +16,7 @@ I got tired of it. So I built [Uncle Jesse](https://dane.codes/uncle-jesse).
 
 ## What It Is
 
-Uncle Jesse is an E2E testing framework for smart TVs. TypeScript, off-device, over HTTP. It talks directly to the Roku via ECP on port 8060 — the same protocol every Roku has shipped with for years. No Appium server. No Selenium Grid. No WebDriver. No Java runtime eating 2GB of RAM so it can relay your button presses through three layers of abstraction.
+Uncle Jesse is an E2E testing framework for smart TVs. TypeScript, off-device, over HTTP. It talks directly to the Roku via ECP on port 8060, the same protocol every Roku has shipped with for years. No Appium server. No Selenium Grid. No WebDriver. No Java runtime eating 2GB of RAM so it can relay your button presses through three layers of abstraction.
 
 <Terminal title="the whole setup" lines={[
   { prompt: true, text: "npm install @danecodes/uncle-jesse-core @danecodes/uncle-jesse-roku @danecodes/uncle-jesse-test" },
@@ -37,7 +35,7 @@ That's it. npm install, write tests, run them. Your tests live in Node. The Roku
 
 ## Why It Feels Like Playwright
 
-I didn't want to invent a new testing API. Web developers have had good E2E tools for years — Playwright, Cypress, WebdriverIO. The patterns are proven. So Uncle Jesse steals liberally from all of them.
+I didn't want to invent a new testing API. Web developers have had good E2E tools for years. Playwright, Cypress, WebdriverIO. The patterns are proven. So Uncle Jesse steals liberally from all of them.
 
 CSS-like selectors on the SceneGraph tree:
 
@@ -52,7 +50,7 @@ If you've ever written `document.querySelector`, you know how to find elements o
 
 ## LiveElement: The Thing That Makes It Actually Useful
 
-Here's what separates Uncle Jesse from "I wrote a wrapper around curl." `LiveElement` is a persistent reference to a UI element that re-queries the device every time you call a method on it. It doesn't cache stale state. It doesn't hold a reference that goes dead when the screen changes. It goes back to the device and checks.
+`LiveElement` is a persistent reference to a UI element that re-queries the device every time you call a method on it. It doesn't cache stale state. It doesn't hold a reference that goes dead when the screen changes. It goes back to the device and checks.
 
 ```typescript
 const homeScreen = new LiveElement(tv, 'HomeScreen');
@@ -68,7 +66,7 @@ const title = homeScreen.$('Label#screenTitle');
 await title.toHaveText('Home');
 ```
 
-The assertions poll automatically. `toBeDisplayed({ timeout: 10000 })` doesn't check once and fail — it polls every 200ms for up to 10 seconds. No `waitUntil` wrappers. No `browser.pause(2000)` and hoping for the best. No "sleep 3 seconds and pray the animation finished."
+The assertions poll automatically. `toBeDisplayed({ timeout: 10000 })` doesn't check once and fail. It polls every 200ms for up to 10 seconds. No `waitUntil` wrappers. No `browser.pause(2000)` and hoping for the best. No "sleep 3 seconds and pray the animation finished."
 
 Every Roku test suite I've worked on has had some version of the sleep-and-pray pattern. It's the leading cause of flaky TV tests, and it's been normalized because the tooling never offered anything better.
 
@@ -89,7 +87,7 @@ const result = await focusPath(tv)
 expect(result.passed).toBe(true);
 ```
 
-It's chainable. It runs every step and collects *all* failures instead of stopping at the first one. Each step waits for focus to stabilize — two consecutive tree queries have to agree — before checking the assertion. No timing hacks.
+It's chainable. It runs every step and collects *all* failures instead of stopping at the first one. Each step waits for focus to stabilize (two consecutive tree queries have to agree) before checking the assertion. No timing hacks.
 
 And when something fails:
 
@@ -105,7 +103,7 @@ You know exactly which steps broke and what actually had focus. Not "test failed
 
 ### Visual Replay
 
-Pass `{ record: true }` and focusPath captures a screenshot and UI tree snapshot at every step. The output is a self-contained HTML file with a scrubber — you can step through the entire navigation sequence visually, seeing exactly what the screen looked like at each point.
+Pass `{ record: true }` and focusPath captures a screenshot and UI tree snapshot at every step. The output is a self-contained HTML file with a scrubber. You can step through the entire navigation sequence visually, seeing exactly what the screen looked like at each point.
 
 ```typescript
 const result = await focusPath(tv, { record: true, testName: 'browse-nav' })
@@ -120,7 +118,7 @@ Give that HTML file to your QA lead. Send it to your PM. Attach it to the cert s
 
 ## Page Objects: Migration-Ready
 
-If you're coming from Appium/WebdriverIO — and let's be honest, if you have Roku E2E tests, there's a good chance you are — Uncle Jesse's page objects are designed to be a near drop-in replacement.
+If you're coming from Appium/WebdriverIO (and let's be honest, if you have Roku E2E tests, there's a good chance you are) Uncle Jesse's page objects are designed to be a near drop-in replacement.
 
 ```typescript
 class HomePage extends BasePage {
@@ -160,17 +158,17 @@ There's a full [migration guide](https://dane.codes/uncle-jesse/migration) if yo
     style E fill:#0f0f0f,stroke:#2e2e2e,color:#9a9590`}
 </Diagram>
 
-Everything flows down through clean layers. The core is platform-agnostic — `TVDevice` and `LiveElement` don't know about Roku. The Roku adapter wraps [roku-ecp](https://dane.codes/roku-ecp) and handles the Roku-specific translation. When other TV platforms get adapter support, your tests don't change.
+Everything flows down through clean layers. The core is platform-agnostic. `TVDevice` and `LiveElement` don't know about Roku. The Roku adapter wraps [roku-ecp](https://dane.codes/roku-ecp) and handles the Roku-specific translation. When other TV platforms get adapter support, your tests don't change.
 
 ## The Stuff Nobody Else Has
 
 A few things that I haven't seen in any other Roku testing tool:
 
-- **Multi-device parallel testing** — `DevicePool` manages a pool of Roku devices. Tests acquire a device, run, and release it. Run your full suite across 3 devices in parallel instead of serial on one.
-- **Log capture** — Stream BrightScript console output during tests via [roku-log](https://github.com/danecodes/roku-log). Catch errors, crashes, and backtraces as structured data. Know *why* a test failed, not just that it did.
-- **Registry state injection** — Skip onboarding flows, set language preferences, configure any app state before launch. No more "test failed because the FTUE modal was showing."
-- **CTRF reporting** — Generate Common Test Reporting Format output for CI dashboards and cross-team analytics.
-- **Mock server integration** — Deterministic test data with scenario management and API call verification.
+- **Multi-device parallel testing.** `DevicePool` manages a pool of Roku devices. Tests acquire a device, run, and release it. Run your full suite across 3 devices in parallel instead of serial on one.
+- **Log capture.** Stream BrightScript console output during tests via [roku-log](https://github.com/danecodes/roku-log). Catch errors, crashes, and backtraces as structured data. Know *why* a test failed, not just that it did.
+- **Registry state injection.** Skip onboarding flows, set language preferences, configure any app state before launch. No more "test failed because the FTUE modal was showing."
+- **CTRF reporting.** Generate Common Test Reporting Format output for CI dashboards and cross-team analytics.
+- **Mock server integration.** Deterministic test data with scenario management and API call verification.
 
 ## Who This Is For
 
