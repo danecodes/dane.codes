@@ -1,0 +1,240 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+const features = [
+  {
+    icon: '🎥',
+    title: 'Focus Cam',
+    desc: 'Keep the four-camera Multi-View up as your pulse-check while a draggable corner player shows one camera with its own audio. See everything, hear what matters.',
+  },
+  {
+    icon: '🎧',
+    title: 'Quad Audio Isolation',
+    desc: "The Multi-View stream pans different rooms into the left and right channels. One key plays a single channel to both ears — with a volume boost for whisper cams.",
+  },
+  {
+    icon: '🖥️',
+    title: 'Theater Mode',
+    desc: 'Blacks out the page and pins the feed edge-to-edge. Just the feeds, nothing else.',
+  },
+  {
+    icon: '⌨️',
+    title: 'Cam Hotkeys',
+    desc: '1–4 switch cameras, 5 for Multi-View, Shift+1–4 open a focus cam — without triggering the site’s own key-reactive UI.',
+  },
+  {
+    icon: '⚡',
+    title: 'Quality Control',
+    desc: 'Lifts the feed player’s bitrate cap and lets you pin a quality, straight from the control bar.',
+  },
+  {
+    icon: '🔒',
+    title: 'Private by Design',
+    desc: 'Runs only on paramountplus.com, requests zero permissions, collects no data, and phones home to nowhere.',
+  },
+];
+
+const shortcuts = [
+  ['1 – 4', 'Switch to that camera'],
+  ['5', 'Multi-View (quad)'],
+  ['Shift + 1–4', 'Open focus cam for that camera'],
+  ['Shift + 5', 'Close focus cam'],
+  [', / .', 'Isolate left / right audio channel'],
+  ['b', 'Cycle volume boost'],
+  ['t', 'Theater mode'],
+  ['f', 'Fullscreen'],
+  ['p', 'Picture-in-picture'],
+  ['m', 'Mute'],
+  ['← / →', 'Seek in the DVR buffer'],
+  ['l', 'Jump to live'],
+];
+---
+
+<BaseLayout
+  title="BBCamMaster"
+  description="A better cockpit for the Big Brother live feeds on Paramount+: focus cam with per-cam audio, quad audio isolation, theater mode, and cam hotkeys. A browser extension for Chrome and Firefox."
+>
+  <section class="page-header">
+    <div class="container">
+      <div class="badges">
+        <span class="pill">Chrome &amp; Firefox</span>
+        <span class="pill">Manifest V3</span>
+        <span class="pill">Zero data collected</span>
+      </div>
+      <h1>BBCamMaster</h1>
+      <p class="page-sub">
+        A better cockpit for the <strong>Big Brother</strong> live feeds on Paramount+.
+        Watch the quad, hear the room you care about, and drive it all from the keyboard.
+      </p>
+      <div class="cta">
+        <a href="/bbcammaster/privacy" class="btn btn-surface">Privacy Policy</a>
+        <a href="#requirements" class="btn btn-surface">Requirements</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <h2>What it does</h2>
+      <div class="feature-grid">
+        {features.map((f) => (
+          <div class="card feature-card">
+            <span class="feature-icon">{f.icon}</span>
+            <h5>{f.title}</h5>
+            <p>{f.desc}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container narrow">
+      <h2>Keyboard shortcuts</h2>
+      <div class="card shortcut-card">
+        <table class="shortcuts">
+          <tbody>
+            {shortcuts.map(([key, action]) => (
+              <tr>
+                <td class="key-cell"><kbd>{key}</kbd></td>
+                <td>{action}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="requirements">
+    <div class="container narrow">
+      <h2>Requirements &amp; disclaimer</h2>
+      <div class="card">
+        <p>
+          BBCamMaster requires your own active <strong>Paramount+</strong> subscription
+          with live feed access. It enhances the appearance and behavior of the Big
+          Brother live feed pages in your own browser only — it does not access, decrypt,
+          record, or redistribute video streams.
+        </p>
+        <p class="muted">
+          BBCamMaster is not affiliated with, endorsed by, or connected to Paramount, CBS,
+          Viacom, or the Big Brother production. Please do not contact them for support
+          with this extension.
+        </p>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .page-header {
+    padding: 100px 0 60px;
+    background: linear-gradient(180deg, var(--color-bg) 0%, var(--color-surface) 100%);
+  }
+
+  .page-sub {
+    font-size: 1.125rem;
+    color: var(--color-text-muted);
+    margin-top: 12px;
+    max-width: 640px;
+  }
+
+  .badges {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+  }
+
+  .pill {
+    font-size: 0.75rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 4px 10px;
+    background: var(--color-surface-raised);
+    color: var(--color-sunshine-500);
+    border: 1px solid var(--color-border);
+  }
+
+  .cta {
+    display: flex;
+    gap: 12px;
+    margin-top: 28px;
+    flex-wrap: wrap;
+  }
+
+  .section {
+    padding-top: 48px;
+  }
+
+  .section h2 {
+    margin-bottom: 32px;
+  }
+
+  .container.narrow {
+    max-width: 760px;
+  }
+
+  .feature-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 24px;
+  }
+
+  .feature-icon {
+    font-size: 1.75rem;
+    display: block;
+    margin-bottom: 12px;
+  }
+
+  .feature-card p {
+    font-size: 0.9375rem;
+    color: var(--color-text-muted);
+  }
+
+  .shortcut-card {
+    padding: 8px 8px;
+  }
+
+  table.shortcuts {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  table.shortcuts td {
+    padding: 10px 16px;
+    border-bottom: 1px solid var(--color-border);
+    color: var(--color-text-muted);
+    font-size: 0.9375rem;
+  }
+
+  table.shortcuts tr:last-child td {
+    border-bottom: none;
+  }
+
+  .key-cell {
+    width: 140px;
+    white-space: nowrap;
+  }
+
+  kbd {
+    font-family: var(--font-body);
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--color-text);
+    background: var(--color-surface-raised);
+    border: 1px solid var(--color-border);
+    border-radius: 4px;
+    padding: 3px 8px;
+  }
+
+  .card p + p {
+    margin-top: 16px;
+  }
+
+  .muted {
+    color: var(--color-text-muted);
+    font-size: 0.875rem;
+  }
+</style>

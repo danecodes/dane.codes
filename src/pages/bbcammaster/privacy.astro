@@ -1,0 +1,145 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+const updated = 'July 19, 2026';
+---
+
+<BaseLayout
+  title="BBCamMaster Privacy Policy"
+  description="Privacy policy for the BBCamMaster browser extension. BBCamMaster collects no data, has no servers, and makes no third-party network requests."
+>
+  <section class="page-header">
+    <div class="container narrow">
+      <p class="eyebrow"><a href="/bbcammaster">BBCamMaster</a></p>
+      <h1>Privacy Policy</h1>
+      <p class="page-sub">Last updated: {updated}</p>
+    </div>
+  </section>
+
+  <section class="policy">
+    <div class="container narrow">
+      <div class="card summary">
+        <p>
+          <strong>BBCamMaster does not collect, store, or transmit any personal data.</strong>
+          It has no servers, no analytics, no tracking, and makes no network requests to
+          any third party.
+        </p>
+      </div>
+
+      <h2>What the extension accesses</h2>
+      <ul>
+        <li>
+          <strong>paramountplus.com pages only.</strong> BBCamMaster runs solely on
+          paramountplus.com, as declared in its manifest. It does not run on any other
+          website.
+        </li>
+        <li>
+          <strong>The page’s video player.</strong> To provide its features — cam switching,
+          focus cam, audio isolation, theater mode, quality control, and keyboard shortcuts —
+          the extension reads and modifies the content of the Paramount+ live feed pages and
+          interacts with the page’s existing video player. This happens entirely within your
+          browser.
+        </li>
+      </ul>
+
+      <h2>Data stored on your device</h2>
+      <p>
+        BBCamMaster saves two small, non-personal values in your browser’s local storage so
+        the extension works smoothly:
+      </p>
+      <ul>
+        <li>The URLs of the Big Brother camera channels it discovers on the page.</li>
+        <li>Your preferred focus-cam window size and position.</li>
+      </ul>
+      <p>
+        This information never leaves your device and is not associated with you. You can
+        clear it at any time by removing the extension or clearing site data for
+        paramountplus.com.
+      </p>
+
+      <h2>Data the extension does not collect</h2>
+      <p>
+        BBCamMaster does not collect or transmit: personally identifiable information,
+        authentication credentials, financial information, health information, location,
+        browsing history, communications, or usage and behavioral analytics.
+      </p>
+
+      <h2>Third parties</h2>
+      <p>
+        BBCamMaster does not sell, share, or transfer any user data to third parties,
+        because it does not collect any user data.
+      </p>
+
+      <h2>Paramount+ / CBS</h2>
+      <p>
+        BBCamMaster is not affiliated with, endorsed by, or connected to Paramount, CBS,
+        Viacom, or the Big Brother production. It requires your own active Paramount+
+        subscription and does not access, decrypt, record, or redistribute video streams.
+      </p>
+
+      <h2>Changes</h2>
+      <p>
+        Any future change to this policy will be reflected on this page with an updated date.
+      </p>
+
+      <h2>Contact</h2>
+      <p>
+        Questions about this policy can be directed to the developer via
+        <a href="/contact">dane.codes/contact</a>.
+      </p>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .page-header {
+    padding: 100px 0 40px;
+    background: linear-gradient(180deg, var(--color-bg) 0%, var(--color-surface) 100%);
+  }
+
+  .eyebrow {
+    font-size: 0.8125rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--color-text-muted);
+    margin-bottom: 8px;
+  }
+
+  .page-sub {
+    font-size: 1rem;
+    color: var(--color-text-muted);
+    margin-top: 12px;
+  }
+
+  .container.narrow {
+    max-width: 760px;
+  }
+
+  .policy {
+    padding: 32px 0 48px;
+  }
+
+  .summary {
+    margin-bottom: 32px;
+  }
+
+  .policy h2 {
+    font-size: 1.25rem;
+    margin: 32px 0 12px;
+  }
+
+  .policy p {
+    color: var(--color-text-muted);
+    margin-bottom: 12px;
+  }
+
+  .policy ul {
+    color: var(--color-text-muted);
+    padding-left: 20px;
+    margin-bottom: 12px;
+  }
+
+  .policy li {
+    margin-bottom: 8px;
+  }
+</style>
