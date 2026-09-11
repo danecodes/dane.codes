@@ -1,0 +1,209 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+const features = [
+  {
+    number: '01',
+    title: 'Read on your terms',
+    text: 'A quiet, native reading experience for the Mac and iPhone. Your feeds, your pace, your library.',
+    color: 'apricot',
+  },
+  {
+    number: '02',
+    title: 'Keep the good stuff',
+    text: 'Save stories locally, mark them read when you are ready, and keep cached article text close at hand.',
+    color: 'brick',
+  },
+  {
+    number: '03',
+    title: 'Bring your feeds',
+    text: 'Add RSS and Atom feeds directly, organize them into folders, or import and export your library with OPML.',
+    color: 'sage',
+  },
+];
+
+const details = [
+  ['Built with', 'SwiftUI'],
+  ['Platforms', 'macOS 14+ · iOS 17+'],
+  ['Sync', 'Private iCloud library sync'],
+  ['Format', 'RSS · Atom · OPML'],
+];
+---
+
+<BaseLayout title="Sludge" description="Sludge is a native RSS reader for Mac and iPhone. A focused, personal news library for keeping up with the feeds that matter.">
+  <div class="sludge-site">
+    <div class="sludge-nav container">
+      <a href="/" class="wordmark"><span class="wordmark-dot"></span> sludge<span class="wordmark-period">.</span></a>
+      <a href="/projects" class="back-link">dane.codes <span aria-hidden="true">↗</span></a>
+    </div>
+
+    <div>
+      <section class="sludge-hero">
+        <div class="container hero-grid">
+          <div class="hero-copy">
+            <p class="eyebrow">A personal RSS reader</p>
+            <h1>Less noise.<br /><em>More signal.</em></h1>
+            <p class="hero-intro">Sludge is a native newsreader for Mac and iPhone, made for people who still want to choose their own sources.</p>
+            <a class="hero-link" href="#features">Explore Sludge <span aria-hidden="true">↓</span></a>
+          </div>
+
+          <div class="hero-mark" aria-label="Sludge app icon">
+            <div class="mark-inner">S</div>
+            <div class="mark-bars" aria-hidden="true"><span></span><span></span><span></span></div>
+            <span class="mark-caption">native / personal / yours</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="manifesto">
+        <div class="container manifesto-grid">
+          <p class="section-label">The idea</p>
+          <div>
+            <h2>News should feel like a library, not a slot machine.</h2>
+            <p class="manifesto-copy">Sludge puts the sources you trust in one calm, tactile place. No recommendation engine. No separate account. Just your feeds, your saved stories, and a reader that gets out of the way.</p>
+          </div>
+        </div>
+      </section>
+
+      <section id="features" class="features">
+        <div class="container">
+          <div class="section-heading">
+            <p class="section-label">Inside the reader</p>
+            <h2>Made for everyday reading.</h2>
+          </div>
+          <div class="feature-grid">
+            {features.map((feature) => (
+              <article class:list={["feature-card", feature.color]}>
+                <span class="feature-number">{feature.number}</span>
+                <h3>{feature.title}</h3>
+                <p>{feature.text}</p>
+              </article>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section class="collection">
+        <div class="container collection-grid">
+          <div class="collection-poster">
+            <span class="poster-kicker">THE SLUDGE</span>
+            <strong>YOUR<br />NEWS.<br /><i>YOUR<br />WAY.</i></strong>
+            <span class="poster-footer">RSS / ATOM / OPML</span>
+          </div>
+          <div class="collection-copy">
+            <p class="section-label">Two ways to browse</p>
+            <h2>Keep your feeds close. Or step into <em>The Sludge.</em></h2>
+            <p>Use My Feeds for your own subscriptions, then switch to The Sludge for a curated starting collection of conservative reporting and opinion from Fox News Politics, National Review, and The American Conservative.</p>
+            <p class="small-note">Sources are delivered as published. Sludge does not generate or rewrite the news.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="details">
+        <div class="container details-grid">
+          <div>
+            <p class="section-label">The fine print</p>
+            <h2>Small app.<br /><em>Strong opinions.</em></h2>
+          </div>
+          <dl>
+            {details.map(([label, value]) => (
+              <div><dt>{label}</dt><dd>{value}</dd></div>
+            ))}
+          </dl>
+        </div>
+      </section>
+    </div>
+
+    <footer class="sludge-footer">
+      <div class="container footer-content">
+        <span class="wordmark">sludge<span class="wordmark-period">.</span></span>
+        <span>A work in progress by <a href="/">Dane Hesseldahl</a></span>
+      </div>
+    </footer>
+  </div>
+</BaseLayout>
+
+<style>
+  .sludge-site {
+    --sludge-ink: #1d1e1b;
+    --sludge-paper: #e8ad68;
+    --sludge-brick: #b35a50;
+    --sludge-sage: #739674;
+    --sludge-cream: #f0d0a0;
+    background: var(--sludge-ink);
+    color: var(--sludge-cream);
+  }
+
+  .sludge-nav { display: flex; justify-content: space-between; align-items: center; padding-top: 26px; padding-bottom: 26px; }
+  .wordmark { color: var(--sludge-paper); font-size: 1.55rem; font-weight: 600; letter-spacing: -1px; }
+  .wordmark:hover { color: var(--sludge-cream); }
+  .wordmark-dot { display: inline-block; width: 12px; height: 12px; margin-right: 7px; border-radius: 50%; background: var(--sludge-paper); }
+  .wordmark-period { color: var(--sludge-brick); }
+  .back-link { color: var(--sludge-cream); font-size: .75rem; text-transform: uppercase; letter-spacing: 1.5px; opacity: .7; }
+  .back-link:hover { color: var(--sludge-paper); opacity: 1; }
+  .sludge-hero { padding: 80px 0 110px; border-top: 1px solid rgba(240,208,160,.18); }
+  .hero-grid { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(280px, .8fr); align-items: center; gap: 80px; }
+  .eyebrow, .section-label, .poster-kicker, .poster-footer, .mark-caption { text-transform: uppercase; letter-spacing: 2px; font-size: .7rem; font-weight: 600; }
+  .eyebrow, .section-label { color: var(--sludge-sage); margin-bottom: 24px; }
+  .hero-copy h1 { color: var(--sludge-paper); font-size: clamp(3.5rem, 9vw, 8.5rem); line-height: .86; letter-spacing: -5px; max-width: 800px; }
+  h1 em, h2 em { color: var(--sludge-brick); font-style: normal; }
+  .hero-intro { max-width: 440px; margin: 34px 0 28px; color: var(--sludge-cream); font-size: 1.1rem; line-height: 1.6; }
+  .hero-link { display: inline-flex; gap: 18px; align-items: center; color: var(--sludge-paper); text-transform: uppercase; letter-spacing: 1.5px; font-size: .75rem; font-weight: 600; }
+  .hero-link span { color: var(--sludge-sage); font-size: 1.2rem; }
+  .hero-link:hover { color: var(--sludge-cream); }
+  .hero-mark { justify-self: end; width: min(34vw, 390px); aspect-ratio: 1; border-radius: 30px; background: var(--sludge-paper); color: var(--sludge-ink); display: flex; flex-direction: column; align-items: center; justify-content: center; transform: rotate(3deg); box-shadow: 15px 18px 0 var(--sludge-brick), 30px 36px 0 var(--sludge-sage); }
+  .mark-inner { font-family: Georgia, serif; font-size: clamp(9rem, 20vw, 17rem); line-height: .8; font-weight: 700; }
+  .mark-bars { display: flex; gap: 16px; margin-top: 54px; }
+  .mark-bars span { width: 56px; height: 16px; border-radius: 99px; background: var(--sludge-ink); }
+  .mark-bars span:nth-child(2) { background: var(--sludge-brick); }
+  .mark-bars span:nth-child(3) { background: var(--sludge-sage); }
+  .mark-caption { margin-top: 22px; font-size: .53rem; letter-spacing: 1px; }
+  .manifesto, .details { background: var(--sludge-paper); color: var(--sludge-ink); }
+  .manifesto { padding: 110px 0; }
+  .manifesto-grid, .details-grid { display: grid; grid-template-columns: .35fr 1fr; gap: 70px; }
+  .manifesto .section-label, .details .section-label { color: var(--sludge-brick); }
+  h2 { font-size: clamp(2.5rem, 5.5vw, 5.2rem); line-height: .95; letter-spacing: -2px; max-width: 850px; }
+  .manifesto-copy { max-width: 620px; margin-top: 34px; font-size: 1.1rem; line-height: 1.7; }
+  .features { padding: 120px 0; }
+  .section-heading { display: flex; justify-content: space-between; align-items: end; gap: 30px; margin-bottom: 50px; }
+  .section-heading h2 { color: var(--sludge-paper); }
+  .feature-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+  .feature-card { min-height: 320px; padding: 30px; border-radius: 24px; color: var(--sludge-ink); display: flex; flex-direction: column; justify-content: space-between; }
+  .feature-card.apricot { background: var(--sludge-paper); }
+  .feature-card.brick { background: var(--sludge-brick); color: #f4d8b0; }
+  .feature-card.sage { background: var(--sludge-sage); color: var(--sludge-ink); }
+  .feature-number { font-size: .8rem; font-weight: 600; opacity: .65; }
+  .feature-card h3 { color: inherit; font-size: 2rem; line-height: 1; letter-spacing: -1px; max-width: 220px; }
+  .feature-card p { max-width: 260px; margin: 0; line-height: 1.55; font-size: .95rem; }
+  .collection { padding: 120px 0; background: #2d302a; }
+  .collection-grid { display: grid; grid-template-columns: .8fr 1.2fr; gap: 100px; align-items: center; }
+  .collection-poster { aspect-ratio: .78; max-width: 360px; padding: 28px; background: var(--sludge-brick); color: var(--sludge-ink); border-radius: 24px; display: flex; flex-direction: column; justify-content: space-between; transform: rotate(-3deg); }
+  .collection-poster strong { font-size: clamp(3rem, 7vw, 6rem); line-height: .83; letter-spacing: -4px; }
+  .collection-poster i { color: var(--sludge-cream); font-style: normal; }
+  .collection-copy h2 { color: var(--sludge-paper); }
+  .collection-copy > p:not(.section-label):not(.small-note) { color: var(--sludge-cream); max-width: 580px; margin-top: 34px; font-size: 1.05rem; line-height: 1.7; }
+  .small-note { color: var(--sludge-sage); max-width: 500px; margin-top: 24px; font-size: .8rem; }
+  .details { padding: 110px 0; }
+  .details-grid h2 { color: var(--sludge-ink); }
+  dl { margin: 0; }
+  dl div { display: flex; justify-content: space-between; gap: 20px; padding: 18px 0; border-bottom: 1px solid rgba(29,30,27,.28); }
+  dt { color: var(--sludge-brick); text-transform: uppercase; letter-spacing: 1.5px; font-size: .7rem; font-weight: 600; }
+  dd { margin: 0; font-size: 1rem; text-align: right; }
+  .sludge-footer { padding: 30px 0; background: var(--sludge-ink); color: var(--sludge-sage); }
+  .footer-content { display: flex; justify-content: space-between; gap: 20px; align-items: center; font-size: .75rem; }
+  .footer-content a { color: var(--sludge-paper); }
+
+  @media (max-width: 760px) {
+    .sludge-hero { padding: 55px 0 85px; }
+    .hero-grid, .manifesto-grid, .details-grid, .collection-grid { grid-template-columns: 1fr; gap: 48px; }
+    .hero-mark { width: min(70vw, 330px); justify-self: center; grid-row: 1; }
+    .hero-copy h1 { letter-spacing: -3px; }
+    .manifesto, .features, .collection, .details { padding: 80px 0; }
+    .section-heading { display: block; }
+    .section-heading h2 { margin-top: 25px; }
+    .feature-grid { grid-template-columns: 1fr; }
+    .feature-card { min-height: 260px; }
+    .collection-poster { width: min(78vw, 340px); }
+    .footer-content { align-items: flex-start; flex-direction: column; }
+  }
+</style>
